@@ -1,0 +1,42 @@
+# Data files and archives
+satalite data.zip
+satalite data/
+data/
+*.zip
+*.tar.gz
+*.7z
+
+# Large binary raster & image formats
+*.tif
+*.tiff
+*.npy
+*.npz
+
+# Model checkpoints and weights
+*.pth
+*.pt
+*.onnx
+*.ckpt
+
+# Python environment & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+venv/
+env/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project internal licenses / logs
+.licenses/
