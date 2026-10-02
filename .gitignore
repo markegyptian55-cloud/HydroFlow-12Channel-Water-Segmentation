@@ -1,7 +1,7 @@
 # Data files and archives
 satalite data.zip
 satalite data/
-data/
+/data/
 *.zip
 *.tar.gz
 *.7z
@@ -12,11 +12,21 @@ data/
 *.npy
 *.npz
 
-# Model checkpoints and weights
+# Model checkpoints, runs, and weights
 *.pth
 *.pt
 *.onnx
 *.ckpt
+runs/
+
+# Web App build & dependencies
+node_modules/
+.next/
+out/
+build/
+web/.next/
+web/node_modules/
+web/out/
 
 # Python environment & cache
 __pycache__/
