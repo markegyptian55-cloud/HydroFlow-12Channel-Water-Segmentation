@@ -226,6 +226,14 @@ water-segmentation/
 │   │   └── heun_sampler.py                     # 2nd-Order Heun ODE Solver
 │   ├── train.py                                # CLI Training Script
 │   └── generate.py                             # CLI Multi-Seed Generator Script
+├── web/                                        # Interactive Geospatial Web Application (Next.js 14)
+│   ├── src/
+│   │   ├── app/                                # Next.js App Router (Layout & Pages)
+│   │   ├── components/                         # Viewport, Split Slider, Spectral Chart, Telemetry
+│   │   └── data/                               # Sentinel-2 Benchmark Scenes & Spectral Curves
+│   ├── package.json
+│   └── tailwind.config.ts
+├── vercel.json                                 # Vercel Monorepo Deployment Config
 ├── .gitignore
 ├── requirements.txt
 └── README.md
@@ -233,7 +241,28 @@ water-segmentation/
 
 ---
 
-## 9. Quickstart & Reproducibility Guide
+## 9. Interactive Geospatial Web Dashboard (Next.js & Vercel)
+
+The repository includes a dedicated interactive web application built with **Next.js 14**, **Tailwind CSS**, and **TypeScript**, enabling real-time client inspection and telemetry analysis of multispectral water segmentation.
+
+### Key Capabilities
+- **Interactive Split-Screen Shoreline Slider**: Drag across satellite scenes to inspect boundary delineation between raw optical bands and AI segmentation masks.
+- **Multispectral Layer Switcher**: Instant switching between Natural RGB, False-Color NIR, Physical NDWI Heatmap, AI Segmented Water Mask, and Generative CFM Synthetic Twins.
+- **12-Band Spectral Signature Visualizer**: Dynamic SVG reflectance curve plotting mean reflectance values across all Sentinel-2 bands (B1 to B12) for water, vegetation, and sand.
+- **Geospatial Telemetry Engine**: Real-time calculation of water surface area ($km^2$), shoreline perimeter ($km$), model confidence, and GeoJSON export.
+- **Zero-Latency Client Architecture**: Pre-calibrated high-resolution geospatial rasters load at 60 FPS on any browser or mobile device without requiring expensive cloud GPUs.
+
+### Running the Web Dashboard Locally
+```bash
+cd web
+npm install
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 10. Quickstart & Reproducibility Guide
 
 ### 1. Installation
 Clone the repository and install dependencies:
@@ -279,7 +308,7 @@ python -m src.train \
 
 ---
 
-## 10. Citation & Attribution
+## 11. Citation & Attribution
 
 If you use this repository or methodology in your research or remote sensing projects, please cite:
 
