@@ -1,4 +1,4 @@
-# Multispectral Satellite Water Segmentation & Generative Data Augmentation (OT-CFM)
+# HydroFlow: Multispectral 12-Channel Satellite Water Segmentation & Generative Flow Matching (OT-CFM)
 
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -238,8 +238,8 @@ water-segmentation/
 ### 1. Installation
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/markegyptian55-cloud/water-segmentation.git
-cd water-segmentation
+git clone https://github.com/markegyptian55-cloud/HydroFlow-12Channel-Water-Segmentation.git
+cd HydroFlow-12Channel-Water-Segmentation
 pip install -r requirements.txt
 ```
 
@@ -284,12 +284,12 @@ python -m src.train \
 If you use this repository or methodology in your research or remote sensing projects, please cite:
 
 ```bibtex
-@misc{elbasyouni2026waterflowmatching,
+@misc{elbasyouni2026hydroflow,
   author = {Mohamed Mostafa Elbasyouni},
-  title = {Multispectral Satellite Water Segmentation & Generative Data Augmentation using Optimal Transport Flow Matching},
+  title = {HydroFlow: Multispectral 12-Channel Satellite Water Segmentation & Generative Data Augmentation using Optimal Transport Flow Matching},
   year = {2026},
   publisher = {GitHub},
-  howpublished = {\url{https://github.com/markegyptian55-cloud/water-segmentation}}
+  howpublished = {\url{https://github.com/markegyptian55-cloud/HydroFlow-12Channel-Water-Segmentation}}
 }
 ```
 
