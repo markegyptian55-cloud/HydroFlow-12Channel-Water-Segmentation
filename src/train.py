@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--metadata_csv", type=str, default="metadata.csv", help="Path to metadata.csv")
     parser.add_argument("--in_channels", type=int, default=6, choices=[6, 12], help="Number of input spectral bands")
     parser.add_argument("--synthetic_dir", type=str, default=None, help="Optional directory containing synthetic scenes")
-    parser.add_argument("--epochs", type=int, default=35, help="Number of training epochs")
+    parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs (default: 100)")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
     parser.add_argument("--output_model", type=str, default="unet_best.pth", help="Path to save best model checkpoint")
@@ -101,6 +101,7 @@ def main():
 
     model = MultispectralUNet(in_channels=args.in_channels, out_channels=1, base=32).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-6)
     criterion = CombinedWaterLoss(bce_weight=0.5, dice_weight=0.5)
     scaler = GradScaler("cuda" if torch.cuda.is_available() else "cpu")
     metrics = SegmentationMetrics()
@@ -125,6 +126,7 @@ def main():
             scaler.step(optimizer)
             scaler.update()
             train_loss += loss.item() * imgs.size(0)
+        scheduler.step()
 
         model.eval()
         val_loss = 0.0
