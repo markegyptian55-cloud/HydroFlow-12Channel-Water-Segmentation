@@ -21,7 +21,7 @@ Mapping and monitoring inland water bodies from satellite observations is vital 
 Instead of discarding the 150 orphan masks or applying naive geometric augmentations, this project formulates an **end-to-end generative data augmentation framework** powered by **Continuous-Time Optimal Transport Conditional Flow Matching (OT-CFM)**:
 - We trained a continuous vector field model to synthesize realistic 6-channel multispectral satellite imagery conditioned purely on binary water geometries.
 - We integrated a **2nd-Order Heun Predictor-Corrector ODE Solver** and designed an automated **3-Stage Physical & Geometric Quality Gatekeeper** that evaluated **1,050 candidate scenes**, strictly rejecting 541 inconsistent samples to prevent **distribution poisoning**.
-- Downstream retraining of a U-Net from scratch on the augmented dataset yielded a verified jump in Validation IoU from **63.02% to 66.20% (+3.18% Net Accuracy Gain)** on completely unseen real satellite test scenes.
+- Downstream retraining of a U-Net from scratch on the augmented dataset yielded a verified jump in Validation IoU from **63.02% to 66.20% (+3.18% Net Accuracy Gain)** in the controlled generative study, while full 100-epoch convergence training established state-of-the-art scratch accuracy of **73.34% Peak IoU (84.62% F1)** on completely unseen real satellite test scenes.
 
 ---
 
@@ -81,7 +81,7 @@ By isolating **B2, B3, B4, B8, B11, B12**, we:
    $$\text{NDWI} = \frac{\text{Green (B3)} - \text{NIR (B8)}}{\text{Green (B3)} + \text{NIR (B8)}}$$
    $$\text{MNDWI} = \frac{\text{Green (B3)} - \text{SWIR (B11)}}{\text{Green (B3)} + \text{SWIR (B11)}}$$
 2. Eliminate 60m coarse atmospheric bands (B1, B9) and 20m redundant Red-Edge transitions.
-3. Accelerate training by **28%**, establishing a realistic operational baseline for edge and cloud deployment.
+3. Accelerate training by **37.2% (1.59x speedup)**, establishing an ultra-efficient operational baseline for edge and cloud deployment.
 
 ---
 
@@ -234,14 +234,6 @@ water-segmentation/
 │   │   └── heun_sampler.py                     # 2nd-Order Heun ODE Solver
 │   ├── train.py                                # CLI Training Script
 │   └── generate.py                             # CLI Multi-Seed Generator Script
-├── web/                                        # Interactive Geospatial Web Application (Next.js 14)
-│   ├── src/
-│   │   ├── app/                                # Next.js App Router (Layout & Pages)
-│   │   ├── components/                         # Viewport, Split Slider, Spectral Chart, Telemetry
-│   │   └── data/                               # Sentinel-2 Benchmark Scenes & Spectral Curves
-│   ├── package.json
-│   └── tailwind.config.ts
-├── vercel.json                                 # Vercel Monorepo Deployment Config
 ├── .gitignore
 ├── requirements.txt
 └── README.md
@@ -249,24 +241,20 @@ water-segmentation/
 
 ---
 
-## 9. Interactive Geospatial Web Dashboard (Next.js & Vercel)
+## 9. Research Trajectory & Part 2 Roadmap (Transfer Learning)
 
-The repository includes a dedicated interactive web application built with **Next.js 14**, **Tailwind CSS**, and **TypeScript**, enabling real-time client inspection and telemetry analysis of multispectral water segmentation.
+Following the complete delivery of **Part 1** (Multispectral Exploratory Data Analysis, 12-Band U-Net Baseline trained from scratch, 6-Band Golden Subset Ablation, and Generative Flow Matching Data Augmentation), this repository transitions directly into **Part 2** (Transfer Learning & Pretrained Backbones):
 
-### Key Capabilities
-- **Interactive Split-Screen Shoreline Slider**: Drag across satellite scenes to inspect boundary delineation between raw optical bands and AI segmentation masks.
-- **Multispectral Layer Switcher**: Instant switching between Natural RGB, False-Color NIR, Physical NDWI Heatmap, AI Segmented Water Mask, and Generative CFM Synthetic Twins.
-- **12-Band Spectral Signature Visualizer**: Dynamic SVG reflectance curve plotting mean reflectance values across all Sentinel-2 bands (B1 to B12) for water, vegetation, and sand.
-- **Geospatial Telemetry Engine**: Real-time calculation of water surface area ($km^2$), shoreline perimeter ($km$), model confidence, and GeoJSON export.
-- **Zero-Latency Client Architecture**: Pre-calibrated high-resolution geospatial rasters load at 60 FPS on any browser or mobile device without requiring expensive cloud GPUs.
-
-### Running the Web Dashboard Locally
-```bash
-cd web
-npm install
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### Key Research Objectives for Part 2
+1. **Pretrained Segmentation Backbones**:
+   - Benchmarking modern transfer learning backbones (e.g., `ResNet-34`, `ResNet-50`, `EfficientNet-B2`) against the scratch U-Net baseline.
+   - Integrating the `segmentation-models-pytorch` (SMP) library with U-Net and DeepLabV3+ decoders.
+2. **First-Layer Spectral Adaptation (12 Channels)**:
+   - Adapting RGB-pretrained first convolutional layers (3 channels) to natively accept all 12 Sentinel-2 multispectral bands.
+   - Implementing and comparing **weight averaging** vs **zero-initialization** strategies for the extra 9 spectral channels to preserve ImageNet spatial feature representations.
+3. **Rigorous Comparative Benchmark**:
+   - Side-by-side evaluation against the Week 1 scratch U-Net (**73.34% Peak IoU / 84.62% F1**) using identical validation scenes and metrics.
+   - Documenting transfer learning convergence velocity and generalization on complex fractal shorelines.
 
 ---
 
@@ -286,7 +274,7 @@ python -m src.train \
     --data_dir ./data \
     --metadata_csv ./data/metadata.csv \
     --in_channels 6 \
-    --epochs 35 \
+    --epochs 100 \
     --batch_size 16 \
     --lr 0.001 \
     --output_model checkpoints/unet_6ch_baseline.pth
@@ -310,7 +298,7 @@ python -m src.train \
     --metadata_csv ./data/metadata.csv \
     --synthetic_dir ./synthetic_water_dataset \
     --in_channels 6 \
-    --epochs 35 \
+    --epochs 100 \
     --output_model checkpoints/unet_augmented.pth
 ```
 
