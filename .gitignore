@@ -50,3 +50,7 @@ env/
 
 # Project internal licenses / logs
 .licenses/
+
+# Internal task briefs & instructions
+pdf taskes/
+*.pdf
