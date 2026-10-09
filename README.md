@@ -1,12 +1,20 @@
 # HydroFlow: Multispectral Satellite Water Segmentation & Generative Flow Matching
 
+[![Live Demo on Vercel](https://img.shields.io/badge/Live%20Demo-Vercel%20Dashboard-000000.svg?style=for-the-badge&logo=vercel&logoColor=white)](https://hydroflow-water-segmentation.vercel.app/)
+[![Kaggle Collection](https://img.shields.io/badge/Kaggle-Research%20Collection%20(6%20Notebooks)-20BEFF.svg?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/work/collections/19309568)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Sentinel-2](https://img.shields.io/badge/Sentinel--2-MSI%2012--Band-005B94.svg?style=for-the-badge)](https://sentinels.copernicus.eu/)
 [![SMP](https://img.shields.io/badge/SMP-ResNet--34%20Pretrained-green.svg?style=for-the-badge)](https://github.com/qubvel-org/segmentation_models.pytorch)
-[![Kaggle](https://img.shields.io/badge/Kaggle-GPU%20T4%20Accelerated-20BEFF.svg?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
+> 🚀 **Live Interactive Research Dashboard (Deployed on Vercel)**:  
+> [**https://hydroflow-water-segmentation.vercel.app/**](https://hydroflow-water-segmentation.vercel.app/)  
+> *(Click any model to dynamically inspect training loss curves, toggle multi-model overlays, and test live NDWI spectral formulas with zero installation).*
+>
+> 📓 **Official Kaggle Research Collection (All 6 Notebooks)**:  
+> [**https://www.kaggle.com/work/collections/19309568**](https://www.kaggle.com/work/collections/19309568)
+>
 > **Cellula Technologies — Comprehensive Research & Engineering Deliverable (Weeks 1 & 2)**  
 > **Author**: [Mohamed Mostafa Elbasyouni](https://github.com/markegyptian55-cloud) | `markegyptian55@gmail.com`
 
@@ -62,6 +70,26 @@ Key Scientific Milestones:
 ✓ Generative Proof-of-Concept:    OT-CFM Generative Augmentation added +3.18% IoU solely from synthetic scenes.
 -------------------------------------------------------------------------------------------------------------
 ```
+
+---
+
+## 2.1 Interactive Research Dashboard
+
+The complete research suite is packaged into a **standalone, self-contained interactive HTML5/CSS3/JavaScript dashboard** that operates 100% offline without mandatory external dependencies:
+- **Primary Dashboard File**: [`reports/interactive_dashboard.html`](reports/interactive_dashboard.html)
+- **Convenience Root Launcher**: [`dashboard.html`](dashboard.html)
+- **Structured JSON Dataset**: [`reports/data/benchmark_data.json`](reports/data/benchmark_data.json)
+
+### Key Dashboard Capabilities:
+1. **Click-to-Inspect Dynamic Curve Canvas**: Click any of the 7 model cards to dynamically update and animate the Chart.js visualizer with that model's exact epoch-by-epoch **Loss Curves (Train Loss vs Val Loss)**, **Validation IoU Progression**, and **Precision vs Recall Convergence**, highlighting the Warmup Phase boundary (Epochs 1–3) and best checkpoints.
+2. **Multi-Model Overlay & Comparison**: Toggle overlay mode to plot multiple backbones (e.g. ResNet-34 12ch vs EfficientNet-B0 12ch vs Custom Scratch U-Net) on the same canvas axes for direct visual gap inspection.
+3. **Pareto Efficiency Frontier**: Interactive scatter plot of Model Parameters (M) vs Global Pixel IoU (%), highlighting how EfficientNet-B0 (6.25M) and ResNet-34 (24.46M) define the optimal accuracy-size trade-off.
+4. **Master Benchmark Matrix**: Filterable and searchable table with dynamic slice filters (`All`, `12-Band Full`, `6-Band Golden`, `Transfer Learning`, `Scratch & CFM`).
+5. **Spectral Physics & Live NDWI/MNDWI Calculator**: Interactive 12-band Sentinel-2 wavelength spectrum with real-time reflectance sliders and natural surface presets (Deep Lake, Turbid River, Forest, Soil) with automatic water classification badges.
+6. **OT-CFM Generative Lab**: Visualizing straight-line ODE probability paths ($x_t = (1-t)x_0 + t x_1$) and the 3-Stage Physical Quality Gatekeeper rejection funnel (1,050 candidates &rarr; 509 accepted scenes).
+7. **Hydrological Regimes & Error Breakdown**: Quantitative error analysis across Open Ocean, Meandering Rivers, Narrow Streams (&le; 2 pixels), and Turbid Waters.
+
+To view the dashboard, simply double-click [`dashboard.html`](dashboard.html) or open it in any web browser (`file:///` protocol supported).
 
 ---
 
@@ -218,18 +246,19 @@ To prevent **Distribution Poisoning**, all 1,050 candidate generated scenes were
 
 ---
 
-## 7. Kaggle Research Notebooks
+## 7. Kaggle Research Notebooks & Master Collection
 
-The complete research suite is available as 6 reproducible, self-contained Kaggle notebooks:
+The complete research suite is organized in the official Kaggle Collection:  
+👉 **[Access the Master Kaggle Collection (19309568)](https://www.kaggle.com/work/collections/19309568)**
 
-| # | Notebook File | Objective & Method | Key Result / Metric | Kaggle Link |
+| # | Notebook File | Objective & Method | Key Result / Metric | Kaggle Access |
 | :-: | :--- | :--- | :---: | :---: |
-| `01` | `01-part1-water-segmentation-eda.ipynb` | Exploratory Data Analysis, 12-band distributions, NDWI analysis | 306 matched pairs, 150 orphan masks | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-eda) |
-| `02` | `02-part1-water-segmentation-unet-12ch.ipynb` | Baseline 12-Channel U-Net trained from scratch (100 Epochs) | **IoU: 73.34%** \| F1: 84.62% | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-u-net-trai) |
-| `03` | `03-part1-water-segmentation-ablation-6ch.ipynb` | Spectral ablation study on Golden 6-band subset (100 Epochs) | **IoU: 64.92%** (37.2% speedup) | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-ablation-6ch) |
-| `04` | `04-part1-water-segmentation-flow-matching.ipynb` | Conditional Flow Matching + Scaled Heun sampling | **+3.18% IoU Boost (66.20%)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-flow-matching) |
-| `05` | `05-part2-water-segmentation-transfer-learning-smp.ipynb` | Pretrained ResNet-34 U-Net (12-Band & 6-Band Fine-Tuning) | **IoU: 82.10% (12ch) \| 80.31% (6ch)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-transfer-learning-smp) |
-| `06` | `06-part2-water-segmentation-transfer-learning-effi.ipynb` | Pretrained EfficientNet-B0 U-Net (12-Band & 6-Band Efficiency) | **IoU: 76.56% (12ch) \| 74.82% (6ch)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-transfer-learning-effi) |
+| `01` | `01-part1-water-segmentation-eda.ipynb` | Exploratory Data Analysis, 12-band distributions, NDWI analysis | 306 matched pairs, 150 orphan masks | [Open in Collection](https://www.kaggle.com/work/collections/19309568) |
+| `02` | `02-part1-water-segmentation-unet-12ch.ipynb` | Baseline 12-Channel U-Net trained from scratch (100 Epochs) | **IoU: 73.34%** \| F1: 84.62% | [Open in Collection](https://www.kaggle.com/work/collections/19309568) |
+| `03` | `03-part1-water-segmentation-ablation-6ch.ipynb` | Spectral ablation study on Golden 6-band subset (100 Epochs) | **IoU: 64.92%** (37.2% speedup) | [Open in Collection](https://www.kaggle.com/work/collections/19309568) |
+| `04` | `04-part1-water-segmentation-flow-matching.ipynb` | Conditional Flow Matching + Scaled Heun sampling | **+3.18% IoU Boost (66.20%)** | [Open in Collection](https://www.kaggle.com/work/collections/19309568) |
+| `05` | `05-part2-water-segmentation-transfer-learning-smp.ipynb` | Pretrained ResNet-34 U-Net (12-Band & 6-Band Fine-Tuning) | **IoU: 82.10% (12ch) \| 80.31% (6ch)** | [Open in Collection](https://www.kaggle.com/work/collections/19309568) |
+| `06` | `06-part2-water-segmentation-transfer-learning-effi.ipynb` | Pretrained EfficientNet-B0 U-Net (12-Band & 6-Band Efficiency) | **IoU: 76.56% (12ch) \| 74.82% (6ch)** | [Open in Collection](https://www.kaggle.com/work/collections/19309568) |
 
 ---
 
@@ -237,6 +266,9 @@ The complete research suite is available as 6 reproducible, self-contained Kaggl
 
 ```
 water-segmentation/
+├── index.html                                             # Web Root Entry Point (Vercel Production)
+├── dashboard.html                                         # Root Launcher Shortcut for Interactive Dashboard
+├── vercel.json                                            # Vercel Production Routing & Header Config
 ├── notebooks/                                              # Full Kaggle Experimental Suite (Parts 1 & 2)
 │   ├── 01-part1-water-segmentation-eda.ipynb               # Part 1: EDA, Band Physics, NDWI
 │   ├── 02-part1-water-segmentation-unet-12ch.ipynb         # Part 1: 12-Band Scratch Baseline (100 Epochs)
@@ -244,8 +276,13 @@ water-segmentation/
 │   ├── 04-part1-water-segmentation-flow-matching.ipynb     # Part 1: CFM Synthesis & Retraining
 │   ├── 05-part2-water-segmentation-transfer-learning-smp.ipynb # Part 2: Transfer Learning ResNet-34 (Task 3)
 │   └── 06-part2-water-segmentation-transfer-learning-effi.ipynb # Part 2: Transfer Learning EfficientNet-B0 (Task 3)
+├── reports/                                                # Evaluation & Interactive Visualizations
+│   ├── interactive_dashboard.html                         # Standalone Interactive HTML5/JS Dashboard
+│   └── data/
+│       └── benchmark_data.json                            # Structured Benchmark Dataset (JSON)
 ├── src/                                                    # Modular Production Library
 │   ├── __init__.py
+│   ├── build_dashboard.py                                 # Automated Dashboard & JSON Compiler
 │   ├── data/
 │   │   ├── __init__.py
 │   │   └── dataset.py                                      # S2 Dataset & Golden Band Slicing
