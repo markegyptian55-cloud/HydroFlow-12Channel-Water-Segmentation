@@ -213,11 +213,11 @@ The complete research suite is available as 5 reproducible, self-contained Kaggl
 
 | # | Notebook File | Objective & Method | Key Result / Metric | Kaggle Link |
 | :-: | :--- | :--- | :---: | :---: |
-| `01` | `01-water-segmentation-eda.ipynb` | Exploratory Data Analysis, 12-band distributions, NDWI analysis | 306 matched pairs, 150 orphan masks | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-eda) |
-| `02` | `02-water-segmentation-unet-12ch.ipynb` | Baseline 12-Channel U-Net trained from scratch (100 Epochs) | **IoU: 73.34%** \| F1: 84.62% | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-u-net-trai) |
-| `03` | `03-water-segmentation-ablation-6ch.ipynb` | Spectral ablation study on Golden 6-band subset (100 Epochs) | **IoU: 64.92%** (37.2% speedup) | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-ablation-6ch) |
-| `04` | `04-water-segmentation-flow-matching.ipynb` | Conditional Flow Matching + Scaled Heun sampling | **+3.18% IoU Boost (66.20%)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-flow-matching) |
-| `05` | `05-water-segmentation-transfer-learning-smp.ipynb` | Pretrained ResNet-34 U-Net (12-Band & 6-Band Fine-Tuning) | **IoU: 82.10% (12ch) \| 80.31% (6ch)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-transfer-learning-smp) |
+| `01` | `01-part1-water-segmentation-eda.ipynb` | Exploratory Data Analysis, 12-band distributions, NDWI analysis | 306 matched pairs, 150 orphan masks | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-eda) |
+| `02` | `02-part1-water-segmentation-unet-12ch.ipynb` | Baseline 12-Channel U-Net trained from scratch (100 Epochs) | **IoU: 73.34%** \| F1: 84.62% | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-u-net-trai) |
+| `03` | `03-part1-water-segmentation-ablation-6ch.ipynb` | Spectral ablation study on Golden 6-band subset (100 Epochs) | **IoU: 64.92%** (37.2% speedup) | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-ablation-6ch) |
+| `04` | `04-part1-water-segmentation-flow-matching.ipynb` | Conditional Flow Matching + Scaled Heun sampling | **+3.18% IoU Boost (66.20%)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-flow-matching) |
+| `05` | `05-part2-water-segmentation-transfer-learning-smp.ipynb` | Pretrained ResNet-34 U-Net (12-Band & 6-Band Fine-Tuning) | **IoU: 82.10% (12ch) \| 80.31% (6ch)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-transfer-learning-smp) |
 
 ---
 
@@ -225,13 +225,12 @@ The complete research suite is available as 5 reproducible, self-contained Kaggl
 
 ```
 water-segmentation/
-├── notebooks/                                              # Full Kaggle Experimental Suite
-│   ├── 01-water-segmentation-eda.ipynb                     # EDA, Band Physics, NDWI
-│   ├── 02-water-segmentation-unet-12ch.ipynb               # 12-Band Scratch Baseline (100 Epochs)
-│   ├── 03-water-segmentation-ablation-6ch.ipynb            # 6-Band Ablation Study (100 Epochs)
-│   ├── 04-water-segmentation-flow-matching.ipynb           # CFM Synthesis & Retraining
-│   ├── 05-water-segmentation-transfer-learning-smp.ipynb   # Transfer Learning ResNet-34 (Weeks 1 & 2)
-│   └── part-2-05-transfer-learning-pretrained-resnet-34.ipynb # Kaggle Mirror Copy
+├── notebooks/                                              # Full Kaggle Experimental Suite (Parts 1 & 2)
+│   ├── 01-part1-water-segmentation-eda.ipynb               # Part 1: EDA, Band Physics, NDWI
+│   ├── 02-part1-water-segmentation-unet-12ch.ipynb         # Part 1: 12-Band Scratch Baseline (100 Epochs)
+│   ├── 03-part1-water-segmentation-ablation-6ch.ipynb      # Part 1: 6-Band Ablation Study (100 Epochs)
+│   ├── 04-part1-water-segmentation-flow-matching.ipynb     # Part 1: CFM Synthesis & Retraining
+│   └── 05-part2-water-segmentation-transfer-learning-smp.ipynb # Part 2: Transfer Learning ResNet-34 (Task 3)
 ├── src/                                                    # Modular Production Library
 │   ├── __init__.py
 │   ├── data/
