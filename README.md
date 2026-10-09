@@ -1,6 +1,6 @@
 # HydroFlow: Multispectral Satellite Water Segmentation & Generative Flow Matching
 
-[![Live Demo on Vercel](https://img.shields.io/badge/Live%20Demo-Vercel%20Dashboard-000000.svg?style=for-the-badge&logo=vercel&logoColor=white)](https://hydroflow-water-segmentation.vercel.app/)
+[![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-GitHub%20Pages-2ea44f.svg?style=for-the-badge&logo=github&logoColor=white)](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)
 [![Kaggle Collection](https://img.shields.io/badge/Kaggle-Research%20Collection%20(6%20Notebooks)-20BEFF.svg?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/work/collections/19309568)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -8,9 +8,9 @@
 [![SMP](https://img.shields.io/badge/SMP-ResNet--34%20Pretrained-green.svg?style=for-the-badge)](https://github.com/qubvel-org/segmentation_models.pytorch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> 🚀 **Live Interactive Research Dashboard (Deployed on Vercel)**:  
-> [**https://hydroflow-water-segmentation.vercel.app/**](https://hydroflow-water-segmentation.vercel.app/)  
-> *(Click any model to dynamically inspect training loss curves, toggle multi-model overlays, and test live NDWI spectral formulas with zero installation).*
+> 🚀 **Live Interactive Research Dashboard**:  
+> [**https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/**](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)  
+> *(Click any model to dynamically inspect training loss curves, toggle multi-model overlays, and test live NDWI spectral formulas directly in your browser with zero installation).*
 >
 > 📓 **Official Kaggle Research Collection (All 6 Notebooks)**:  
 > [**https://www.kaggle.com/work/collections/19309568**](https://www.kaggle.com/work/collections/19309568)
@@ -76,6 +76,7 @@ Key Scientific Milestones:
 ## 2.1 Interactive Research Dashboard
 
 The complete research suite is packaged into a **standalone, self-contained interactive HTML5/CSS3/JavaScript dashboard** that operates 100% offline without mandatory external dependencies:
+- **Live Online URL**: [https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)
 - **Primary Dashboard File**: [`reports/interactive_dashboard.html`](reports/interactive_dashboard.html)
 - **Convenience Root Launcher**: [`dashboard.html`](dashboard.html)
 - **Structured JSON Dataset**: [`reports/data/benchmark_data.json`](reports/data/benchmark_data.json)
