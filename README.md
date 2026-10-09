@@ -77,8 +77,7 @@ Key Scientific Milestones:
 
 The complete research suite is packaged into a **standalone, self-contained interactive HTML5/CSS3/JavaScript dashboard** that operates 100% offline without mandatory external dependencies:
 - **Live Online URL**: [https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)
-- **Primary Dashboard File**: [`reports/interactive_dashboard.html`](reports/interactive_dashboard.html)
-- **Convenience Root Launcher**: [`dashboard.html`](dashboard.html)
+- **Primary Dashboard File**: [`index.html`](index.html)
 - **Structured JSON Dataset**: [`reports/data/benchmark_data.json`](reports/data/benchmark_data.json)
 
 ### Key Dashboard Capabilities:
@@ -90,7 +89,7 @@ The complete research suite is packaged into a **standalone, self-contained inte
 6. **OT-CFM Generative Lab**: Visualizing straight-line ODE probability paths ($x_t = (1-t)x_0 + t x_1$) and the 3-Stage Physical Quality Gatekeeper rejection funnel (1,050 candidates &rarr; 509 accepted scenes).
 7. **Hydrological Regimes & Error Breakdown**: Quantitative error analysis across Open Ocean, Meandering Rivers, Narrow Streams (&le; 2 pixels), and Turbid Waters.
 
-To view the dashboard, simply double-click [`dashboard.html`](dashboard.html) or open it in any web browser (`file:///` protocol supported).
+To view the dashboard, simply double-click [`index.html`](index.html) or open it in any web browser (`file:///` protocol supported).
 
 ---
 
@@ -267,8 +266,7 @@ The complete research suite is organized in the official Kaggle Collection:
 
 ```
 water-segmentation/
-├── index.html                                             # Web Root Entry Point (GitHub Pages Production)
-├── dashboard.html                                         # Root Launcher Shortcut for Interactive Dashboard
+├── index.html                                             # Standalone Interactive Dashboard (GitHub Pages Production)
 ├── .nojekyll                                              # GitHub Pages Static Engine Configuration
 ├── notebooks/                                              # Full Kaggle Experimental Suite (Parts 1 & 2)
 │   ├── 01-part1-water-segmentation-eda.ipynb               # Part 1: EDA, Band Physics, NDWI
@@ -277,8 +275,7 @@ water-segmentation/
 │   ├── 04-part1-water-segmentation-flow-matching.ipynb     # Part 1: CFM Synthesis & Retraining
 │   ├── 05-part2-water-segmentation-transfer-learning-smp.ipynb # Part 2: Transfer Learning ResNet-34 (Task 3)
 │   └── 06-part2-water-segmentation-transfer-learning-effi.ipynb # Part 2: Transfer Learning EfficientNet-B0 (Task 3)
-├── reports/                                                # Evaluation & Interactive Visualizations
-│   ├── interactive_dashboard.html                         # Standalone Interactive HTML5/JS Dashboard
+├── reports/                                                # Evaluation & Benchmark Datasets
 │   └── data/
 │       └── benchmark_data.json                            # Structured Benchmark Dataset (JSON)
 ├── src/                                                    # Modular Production Library

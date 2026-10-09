@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const html = fs.readFileSync('dashboard.html', 'utf-8');
+const html = fs.readFileSync('index.html', 'utf-8');
 
 // 1. Check syntax of all script tags
 const scripts = [...html.matchAll(/<script[\s\S]*?>([\s\S]*?)<\/script>/gi)];

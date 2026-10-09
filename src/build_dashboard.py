@@ -2111,17 +2111,11 @@ def build_dashboard():
 </html>
 """
 
-    # 1. Write reports/interactive_dashboard.html
-    report_file = 'reports/interactive_dashboard.html'
-    with open(report_file, 'w', encoding='utf-8') as f:
+    # Write single standalone index.html at root
+    output_file = 'index.html'
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html_content)
-    print(f"Generated {report_file} ({len(html_content)} bytes).")
-
-    # 2. Write dashboard.html at root as identical standalone launcher
-    root_file = 'dashboard.html'
-    with open(root_file, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-    print(f"Generated {root_file} ({len(html_content)} bytes).")
+    print(f"Generated {output_file} ({len(html_content)} bytes).")
 
 if __name__ == '__main__':
     build_dashboard()
