@@ -39,9 +39,12 @@ class PretrainedSMPUNet(nn.Module):
         """Freezes all backbone encoder parameters for the initial warmup phase."""
         for param in self.model.encoder.parameters():
             param.requires_grad = False
-        # Ensure the adapted first convolutional layer remains trainable if desired
+        # Ensure the adapted first convolutional layer remains trainable during warmup
         if hasattr(self.model.encoder, "conv1"):
             for param in self.model.encoder.conv1.parameters():
+                param.requires_grad = True
+        elif hasattr(self.model.encoder, "_conv_stem"):
+            for param in self.model.encoder._conv_stem.parameters():
                 param.requires_grad = True
 
     def unfreeze_encoder(self):

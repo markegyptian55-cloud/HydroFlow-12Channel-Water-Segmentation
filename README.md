@@ -37,27 +37,29 @@ Mapping and monitoring inland water bodies from satellite observations is vital 
 
 ---
 
-## 2. Official Master 4-Way Comparative Benchmark
+## 2. Official Master 6-Way Comparative Benchmark
 
 All experiments were executed under strict scientific parity: deterministic random seed (`42`), identical 80/20 stratified split (**244 training scenes vs 62 strictly unseen validation scenes / 1,015,808 pixels**), mixed-precision AdamW optimization with Cosine Annealing, and joint BCE + Dice loss.
 
 ### Official Cross-Architecture Performance Matrix
 
-| Experiment ID | Architecture & Paradigm | Input Spectral Bands | Peak Val IoU | Global Pixel IoU | Precision | Recall | F1-Score (Dice) | Convergence Epoch | Duration |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `W1-Scratch-12ch` | `Custom U-Net (Scratch)` | 12 Bands (Full) | `73.34%` | `73.33%` | `86.85%` | `82.50%` | `84.62%` | Epoch 74 / 100 | 276.3 s |
-| `W1-Scratch-6ch` | `Custom U-Net (Scratch)` | 6 Golden Bands | `64.92%` | `65.64%` | `85.91%` | `71.90%` | `78.16%` | Epoch 97 / 100 | 222.5 s |
-| `W2-SMP-12ch` | `Pretrained ResNet-34 U-Net` | 12 Bands (Full) | **`82.10%`** | **`81.66%`** | `91.48%` | **`88.39%`** | **`89.91%`** | Epoch 69 / 89 | **209.0 s** |
-| `W2-SMP-6ch` | `Pretrained ResNet-34 U-Net` | 6 Golden Bands | **`80.31%`** | **`79.80%`** | **`91.83%`** | `85.89%` | `88.76%` | Epoch 98 / 100 | 238.1 s |
+| Experiment ID | Architecture & Paradigm | Backbone | Input Bands | Params | Global Pixel IoU | Precision | Recall | F1-Score | Duration |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `W1-Scratch-12ch` | `Custom U-Net (Scratch)` | Scratch Baseline | 12 Bands | 7.77M | `73.33%` | `86.85%` | `82.50%` | `84.62%` | 276.3 s |
+| `W1-Scratch-6ch` | `Custom U-Net (Scratch)` | Scratch Baseline | 6 Golden Bands | 7.76M | `64.92%` | `84.81%` | `73.47%` | `78.73%` | 173.5 s |
+| `W2-Pretrained-ResNet34-12ch` | `SMP U-Net (Transfer)` | ResNet-34 | 12 Bands | 24.46M | **`81.66%`** | **`91.48%`** | **`88.39%`** | **`89.91%`** | 209.0 s |
+| `W2-Pretrained-ResNet34-6ch` | `SMP U-Net (Transfer)` | ResNet-34 | 6 Golden Bands | 24.46M | **`79.80%`** | **`91.83%`** | `85.89%` | **`88.75%`** | 238.1 s |
+| `W2-Pretrained-EffNetB0-12ch` | `SMP U-Net (Transfer)` | EfficientNet-B0 | 12 Bands | **6.25M** | **`76.56%`** | `86.73%` | `86.72%` | `86.72%` | 405.8 s |
+| `W2-Pretrained-EffNetB0-6ch` | `SMP U-Net (Transfer)` | EfficientNet-B0 | 6 Golden Bands | **6.25M** | **`74.82%`** | `83.61%` | `87.68%` | `85.60%` | 187.8 s |
 
 ```
 Key Scientific Milestones:
 -------------------------------------------------------------------------------------------------------------
-✓ Absolute Performance Leader:  12-Band Pretrained ResNet-34 reaches 82.10% Peak IoU (+8.76% over scratch).
-✓ Extreme Precision:            6-Band Pretrained ResNet-34 achieves 91.83% Precision with 50% less data.
-✓ Ablation Resilience:          Dropping from 12 to 6 bands caused an 8.42% IoU drop in Scratch, but ONLY 1.79% in Pretrained!
-✓ Generative Proof-of-Concept:  OT-CFM Generative Augmentation added +3.18% IoU solely from synthetic scenes.
-✓ Error Reduction:              Pretrained transfer learning reduced false alarms by 34.1% and missed water by 33.6%.
+✓ Absolute Performance Leader:    12-Band Pretrained ResNet-34 reaches 81.66% Global IoU (82.10% Peak Val IoU).
+✓ Extreme Parameter Efficiency:   Pretrained EfficientNet-B0 delivers 76.56% IoU with ONLY 6.25M params (nearly 4x smaller).
+✓ Transfer Learning Supremacy:    Both pretrained models decisively surpass the Week 1 scratch baseline (+8.33% and +3.23% IoU).
+✓ 6-Band Ablation Resilience:     EfficientNet-B0 6ch (+9.90% over Scratch 6ch) proves pretraining compensates for missing bands.
+✓ Generative Proof-of-Concept:    OT-CFM Generative Augmentation added +3.18% IoU solely from synthetic scenes.
 -------------------------------------------------------------------------------------------------------------
 ```
 
@@ -174,7 +176,16 @@ $$\mathbb{E} \left[ \sum_{c=1}^{C_{\text{in}}} W_{\text{adapted}}^{(c)} X^{(c)} 
 ### 4. Qualitative Error Analysis Across Water Regimes
 - **High Water (Ocean / Lake)**: 99.8% match with ground truth; pure green True Positive map.
 - **Mixed River & Wetland**: Razor-sharp delineation of meandering river shorelines; zero false alarms on adjacent farmland.
-- **Thin Streams ($\le 2$ pixels)**: Identified as the primary physical challenge. The $32\times$ spatial downsampling in ResNet-34 ($128 \rightarrow 4$ feature resolution) can cause narrow streams to lose spatial continuity.
+- **Thin Streams ($\le 2$ pixels)**: Identified as the primary physical challenge. The $32\times$ spatial downsampling in deep encoders ($128 \rightarrow 4$ feature resolution) can cause narrow streams to lose spatial continuity.
+
+### 5. Backbone Architecture Comparison: ResNet-34 vs EfficientNet-B0
+- **Accuracy Supremacy (ResNet-34)**:
+  - **Dense Receptive Stem**: ResNet-34 utilizes a standard $7 \times 7$ dense convolution in its stem. For a 12-channel input, every single kernel computes simultaneous spatial and cross-channel linear combinations across all 12 bands from the very first layer. This directly mirrors physical spectral arithmetic (e.g., $\text{NDWI} = (B3 - B8)/(B3 + B8)$).
+  - **Decoder Bandwidth**: ResNet-34 routes wider feature channels through skip connections `[64, 64, 128, 256]` into the U-Net decoder, preserving spatial fidelity along complex shorelines and fine river tributaries.
+- **Edge Efficiency Supremacy (EfficientNet-B0)**:
+  - **Parameter Footprint**: EfficientNet-B0 achieves **76.56% IoU** (surpassing the Week 1 Scratch baseline by **+3.23%**) using only **6.25M parameters**—nearly **$4\times$ smaller** than ResNet-34 (24.46M) and 20% smaller than the scratch baseline (7.77M).
+  - **Spectral Cross-Talk Limitation**: EfficientNet relies heavily on Depthwise Separable Convolutions (MBConv blocks), which decompose spatial filtering from channel mixing. In multispectral remote sensing where pixel-level band interactions drive class separation, this separation slightly caps accuracy compared to full dense convolutions.
+  - **Operational Recommendation**: ResNet-34 for maximum mapping precision in cloud/server pipelines; EfficientNet-B0 for real-time onboard satellite inference and resource-constrained edge computing.
 
 ---
 
@@ -209,7 +220,7 @@ To prevent **Distribution Poisoning**, all 1,050 candidate generated scenes were
 
 ## 7. Kaggle Research Notebooks
 
-The complete research suite is available as 5 reproducible, self-contained Kaggle notebooks:
+The complete research suite is available as 6 reproducible, self-contained Kaggle notebooks:
 
 | # | Notebook File | Objective & Method | Key Result / Metric | Kaggle Link |
 | :-: | :--- | :--- | :---: | :---: |
@@ -218,6 +229,7 @@ The complete research suite is available as 5 reproducible, self-contained Kaggl
 | `03` | `03-part1-water-segmentation-ablation-6ch.ipynb` | Spectral ablation study on Golden 6-band subset (100 Epochs) | **IoU: 64.92%** (37.2% speedup) | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-ablation-6ch) |
 | `04` | `04-part1-water-segmentation-flow-matching.ipynb` | Conditional Flow Matching + Scaled Heun sampling | **+3.18% IoU Boost (66.20%)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-flow-matching) |
 | `05` | `05-part2-water-segmentation-transfer-learning-smp.ipynb` | Pretrained ResNet-34 U-Net (12-Band & 6-Band Fine-Tuning) | **IoU: 82.10% (12ch) \| 80.31% (6ch)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-transfer-learning-smp) |
+| `06` | `06-part2-water-segmentation-transfer-learning-effi.ipynb` | Pretrained EfficientNet-B0 U-Net (12-Band & 6-Band Efficiency) | **IoU: 76.56% (12ch) \| 74.82% (6ch)** | [View Notebook](https://www.kaggle.com/code/markegyptian/water-segmentation-transfer-learning-effi) |
 
 ---
 
@@ -230,7 +242,8 @@ water-segmentation/
 │   ├── 02-part1-water-segmentation-unet-12ch.ipynb         # Part 1: 12-Band Scratch Baseline (100 Epochs)
 │   ├── 03-part1-water-segmentation-ablation-6ch.ipynb      # Part 1: 6-Band Ablation Study (100 Epochs)
 │   ├── 04-part1-water-segmentation-flow-matching.ipynb     # Part 1: CFM Synthesis & Retraining
-│   └── 05-part2-water-segmentation-transfer-learning-smp.ipynb # Part 2: Transfer Learning ResNet-34 (Task 3)
+│   ├── 05-part2-water-segmentation-transfer-learning-smp.ipynb # Part 2: Transfer Learning ResNet-34 (Task 3)
+│   └── 06-part2-water-segmentation-transfer-learning-effi.ipynb # Part 2: Transfer Learning EfficientNet-B0 (Task 3)
 ├── src/                                                    # Modular Production Library
 │   ├── __init__.py
 │   ├── data/
@@ -240,7 +253,7 @@ water-segmentation/
 │   │   ├── __init__.py
 │   │   ├── unet.py                                         # Multispectral Scratch U-Net
 │   │   ├── flow_matching.py                                # Conditional Flow Matching Network
-│   │   └── pretrained_smp.py                               # Pretrained ResNet-34 SMP U-Net
+│   │   └── pretrained_smp.py                               # Pretrained SMP U-Net (ResNet-34 & EfficientNet-B0)
 │   ├── losses/
 │   │   ├── __init__.py
 │   │   └── combined_loss.py                                # Combined BCE + Dice Loss
