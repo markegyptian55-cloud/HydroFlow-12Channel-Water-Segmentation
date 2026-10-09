@@ -88,7 +88,7 @@
 | :--- | :---: | :--- | :--- |
 | `v2.1-clean-suite` | `2152d27` | النسخة المعتمدة والمرفوعة رسمياً على GitHub؛ متضمنة الدفاتر الـ 5 بأسماء موحدة ونظيفة، وحذف التكرار، وتحديث الـ README. | `git reset --hard v2.1-clean-suite` |
 | `v2.2-master-suite` | `7436de8` | النسخة المعتمدة والمرفوعة رسمياً على GitHub؛ متضمنة الدفاتر الـ 6 كاملة مع EfficientNet-B0، والمصفوفة السداسية الشاملة. | `git reset --hard v2.2-master-suite` |
-| `v2.3-interactive-suite` | `77cad6a` | لوحة التحكم التفاعلية الشاملة (Dashboard) مع دعم Vercel وربط كاجل كوليكشن. | `git reset --hard v2.3-interactive-suite` |
+| `v2.3-interactive-suite` | `77cad6a` | لوحة التحكم التفاعلية الشاملة (Dashboard) مع نشر GitHub Pages المباشر وربط كاجل كوليكشن. | `git reset --hard v2.3-interactive-suite` |
 
 ---
 

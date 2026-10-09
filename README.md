@@ -267,9 +267,9 @@ The complete research suite is organized in the official Kaggle Collection:
 
 ```
 water-segmentation/
-├── index.html                                             # Web Root Entry Point (Vercel Production)
+├── index.html                                             # Web Root Entry Point (GitHub Pages Production)
 ├── dashboard.html                                         # Root Launcher Shortcut for Interactive Dashboard
-├── vercel.json                                            # Vercel Production Routing & Header Config
+├── .nojekyll                                              # GitHub Pages Static Engine Configuration
 ├── notebooks/                                              # Full Kaggle Experimental Suite (Parts 1 & 2)
 │   ├── 01-part1-water-segmentation-eda.ipynb               # Part 1: EDA, Band Physics, NDWI
 │   ├── 02-part1-water-segmentation-unet-12ch.ipynb         # Part 1: 12-Band Scratch Baseline (100 Epochs)
