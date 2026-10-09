@@ -11,7 +11,8 @@ from torch.utils.data import Dataset
 # 0: B1 (Coastal Aerosol), 1: B2 (Blue), 2: B3 (Green), 3: B4 (Red)
 # 4: B5 (RE1), 5: B6 (RE2), 6: B7 (RE3), 7: B8 (NIR)
 # 8: B8A (Narrow NIR), 9: B9 (Water Vapour), 10: B11 (SWIR-1), 11: B12 (SWIR-2)
-GOLDEN_BAND_INDICES = [1, 2, 3, 7, 10, 11] # B2, B3, B4, B8, B11, B12
+GOLDEN_BAND_INDICES = [1, 2, 3, 7, 10, 11]  # B2, B3, B4, B8, B11, B12
+GOLDEN_BAND_NAMES = ["B2_Blue", "B3_Green", "B4_Red", "B8_NIR", "B11_SWIR1", "B12_SWIR2"]
 
 # Calibrated min-max bounds for the 6 Golden Bands across dataset
 NORM_MIN = [143.0, 307.0, 204.0, 64.0, 10.0, 0.0]
@@ -85,3 +86,20 @@ class MultispectralWaterDataset(Dataset):
                 mask_chw = np.rot90(mask_chw, k=k_rot, axes=(1, 2)).copy()
 
         return torch.from_numpy(norm_img), torch.from_numpy(mask_chw)
+
+
+class GoldenMultispectralDataset(Dataset):
+    """
+    Transparent wrapper around a 12-band dataset instance that slices
+    only the 6 golden bands [1, 2, 3, 7, 10, 11] (B2, B3, B4, B8, B11, B12).
+    """
+    def __init__(self, base_dataset: Dataset):
+        self.base_dataset = base_dataset
+
+    def __len__(self) -> int:
+        return len(self.base_dataset)
+
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        img, mask = self.base_dataset[idx]
+        img_6ch = img[GOLDEN_BAND_INDICES, :, :]
+        return img_6ch, mask
