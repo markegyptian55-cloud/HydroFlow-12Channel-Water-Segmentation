@@ -1,7 +1,7 @@
 /**
  * HydroFlow Interactive Earth Satellite Explorer
  * Powered by Leaflet.js and Real-Time /predict_geo Satellite Segmentation
- * Supports 4 Analysis Footprint Modes: Small 1x, Medium 2x, Large 3x, and Full Viewport
+ * Strict Honesty: Zero simulated/fake overlays or hardcoded numbers
  */
 
 let hydroMap = null;
@@ -11,19 +11,19 @@ let currentMarker = null;
 let currentAreaMode = 'small'; // 'small', 'medium', 'large', 'viewport'
 
 let selectedPoint = {
-    lat: 22.45,
-    lon: 31.85,
+    lat: 22.4500,
+    lon: 31.8500,
     zoom: 12,
     name: 'Lake Nasser (Egypt)'
 };
 
 const PRESET_LOCATIONS = {
-    'nasser': { name: 'Lake Nasser (Egypt)', lat: 22.45, lon: 31.85, zoom: 12 },
-    'aswan': { name: 'Aswan High Dam (Egypt)', lat: 23.97, lon: 32.88, zoom: 13 },
-    'cairo_nile': { name: 'Nile River (Cairo)', lat: 30.044, lon: 31.235, zoom: 14 },
-    'suez': { name: 'Suez Canal (Great Bitter Lake)', lat: 30.34, lon: 32.36, zoom: 12 },
-    'lake_mead': { name: 'Lake Mead Reservoir (USA)', lat: 36.14, lon: -114.43, zoom: 12 },
-    'lake_como': { name: 'Lake Como (Italy)', lat: 45.98, lon: 9.26, zoom: 12 }
+    'nasser': { name: 'Lake Nasser (Egypt)', lat: 22.4500, lon: 31.8500, zoom: 12 },
+    'aswan': { name: 'Aswan High Dam (Egypt)', lat: 23.9700, lon: 32.8800, zoom: 13 },
+    'cairo_nile': { name: 'Nile River (Cairo)', lat: 30.0440, lon: 31.2350, zoom: 14 },
+    'suez': { name: 'Suez Canal / Bitter Lakes', lat: 30.3400, lon: 32.3600, zoom: 12 },
+    'lake_mead': { name: 'Lake Mead (USA)', lat: 36.1400, lon: -114.4300, zoom: 12 },
+    'lake_como': { name: 'Lake Como (Italy)', lat: 45.9800, lon: 9.2600, zoom: 12 }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -31,11 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initMapControls();
 });
 
+/* ==========================================================================
+   1. LEAFLET MAP INITIALIZATION
+   ========================================================================== */
 function initLeafletMap() {
     const mapElement = document.getElementById('leaflet-map');
     if (!mapElement) return;
 
-    // Start centered at Lake Nasser, Egypt
     hydroMap = L.map('leaflet-map', {
         center: [selectedPoint.lat, selectedPoint.lon],
         zoom: selectedPoint.zoom,
@@ -46,19 +48,18 @@ function initLeafletMap() {
     L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
-            attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics, USDA, USGS, AeroGRID, IGN, and GIS User Community',
+            attribution: '&copy; Esri, Maxar, Earthstar Geographics, USDA, USGS',
             maxZoom: 18,
             minZoom: 3
         }
     ).addTo(hydroMap);
 
-    // Save global reference for window resize
     window.hydroMap = hydroMap;
 
     // Place initial beacon at Lake Nasser
     placeBeacon(selectedPoint.lat, selectedPoint.lon, selectedPoint.name);
 
-    // Map Click event: Places beacon and waits for manual inference
+    // Map Click: reposition beacon only (NO auto-analysis)
     hydroMap.on('click', (e) => {
         const lat = e.latlng.lat;
         const lon = e.latlng.lng;
@@ -68,7 +69,6 @@ function initLeafletMap() {
         placeBeacon(lat, lon, 'Target Beacon');
     });
 
-    // Update GPS coordinates display on move
     hydroMap.on('move', () => {
         updateMapCenterDisplay();
     });
@@ -91,164 +91,104 @@ function placeBeacon(lat, lon, name = 'Target Beacon') {
         hydroMap.removeLayer(currentMarker);
     }
 
-    // High-visibility animated beacon marker
+    // High-visibility SVG Beacon Marker
     const icon = L.divIcon({
-        className: 'custom-beacon-marker',
+        className: 'custom-beacon-div',
         html: `
-            <div class="beacon-pulse"></div>
-            <div class="beacon-core" title="Click to inspect point"></div>
+            <div style="position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <span style="position: absolute; width: 28px; height: 28px; border-radius: 50%; background: var(--water-data); opacity: 0.35; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+                <span style="position: relative; width: 14px; height: 14px; border-radius: 50%; background: var(--water-data); border: 2px solid #ffffff; box-shadow: 0 0 8px rgba(0,0,0,0.5);"></span>
+            </div>
         `,
-        iconSize: [44, 44],
-        iconAnchor: [22, 22]
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
     });
 
     currentMarker = L.marker([lat, lon], { icon }).addTo(hydroMap);
 
-    const modeLabel = currentAreaMode === 'viewport' ? 'Full Viewport' : currentAreaMode.toUpperCase();
+    const modeLabel = currentAreaMode === 'viewport' ? 'Screen' : currentAreaMode.toUpperCase();
 
-    // Interactive popup with coordinates and prominent analyze button
-    const popupContent = `
-        <div style="min-width: 220px; text-align: center; font-family: system-ui, -apple-system, sans-serif; padding: 2px;">
-            <div style="font-weight: 700; font-size: 13px; color: #00e5ff; margin-bottom: 3px; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                <i class="fa-solid fa-location-dot"></i> ${name}
+    // Popup with manual trigger
+    const popupHtml = `
+        <div style="font-family: -apple-system, sans-serif; font-size: 12px; color: #0f172a; padding: 4px; text-align: center; min-width: 180px;">
+            <div style="font-weight: 700; margin-bottom: 2px; color: #00667e;">${name}</div>
+            <div style="font-family: monospace; font-size: 11px; color: #64748b; margin-bottom: 6px;">
+                ${lat.toFixed(4)}°, ${lon.toFixed(4)}°
             </div>
-            <div style="font-size: 11px; color: #94a3b8; font-family: monospace; margin-bottom: 6px;">
-                Lat: ${lat.toFixed(4)}° | Lon: ${lon.toFixed(4)}°
-            </div>
-            <div style="font-size: 10px; color: #38bdf8; font-family: monospace; margin-bottom: 8px;">
-                Scope Mode: <b style="color: #00e5ff;">${modeLabel}</b>
-            </div>
-            <button id="btn-popup-infer" onclick="window.triggerPopupAnalysis()" style="width: 100%; padding: 8px 12px; background: linear-gradient(135deg, #00e5ff, #0284c7); color: #0a0e17; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 14px rgba(0, 229, 255, 0.4); transition: transform 0.15s ease;">
-                <i class="fa-solid fa-water"></i> Analyze Water Here
+            <button onclick="window.triggerMapAnalysis()" style="width: 100%; padding: 6px 10px; background: #00667e; color: #ffffff; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                Analyze Surface Water
             </button>
-            <div id="popup-status-text" style="margin-top: 6px; font-size: 11px; font-weight: 600; color: #38bdf8; display: none;"></div>
         </div>
     `;
 
-    currentMarker.bindPopup(popupContent, {
+    currentMarker.bindPopup(popupHtml, {
         closeButton: true,
         autoPan: true,
-        offset: [0, -14]
-    }).openPopup();
+        offset: [0, -10]
+    });
 
-    // Update Target Status display in toolbar
-    const hint = document.getElementById('selected-target-hint');
-    if (hint) {
-        hint.textContent = `Selected: [${lat.toFixed(4)}°, ${lon.toFixed(4)}°] (${currentAreaMode.toUpperCase()})`;
+    const statusBadge = document.getElementById('map-target-status');
+    if (statusBadge) {
+        statusBadge.textContent = `Target [${lat.toFixed(2)}°, ${lon.toFixed(2)}°]`;
     }
 }
 
-// Global hook for popup button click
-window.triggerPopupAnalysis = function() {
+window.triggerMapAnalysis = function() {
     if (selectedPoint) {
         executeGeoInference(selectedPoint.lat, selectedPoint.lon, hydroMap.getZoom());
     }
 };
 
-function setAreaMode(mode) {
-    currentAreaMode = mode;
-
-    // Toggle button active classes
-    document.querySelectorAll('.area-mode-btn').forEach(btn => {
-        if (btn.getAttribute('data-area-mode') === mode) {
-            btn.classList.add('active', 'bg-cyan-500', 'text-dark-900', 'shadow');
-            btn.classList.remove('text-slate-300');
-        } else {
-            btn.classList.remove('active', 'bg-cyan-500', 'text-dark-900', 'shadow');
-            btn.classList.add('text-slate-300');
-        }
-    });
-
-    // Update primary action button text
-    const actionLabel = document.getElementById('btn-segment-selected-label');
-    if (actionLabel) {
-        if (mode === 'viewport') {
-            actionLabel.textContent = 'Analyze Full Viewport Screen';
-        } else if (mode === 'large') {
-            actionLabel.textContent = 'Analyze Target (Large 3x)';
-        } else if (mode === 'medium') {
-            actionLabel.textContent = 'Analyze Target (Medium 2x)';
-        } else {
-            actionLabel.textContent = 'Analyze Target (Small 1x)';
-        }
-    }
-
-    // Update hint text
-    const hint = document.getElementById('selected-target-hint');
-    if (hint && selectedPoint) {
-        hint.textContent = `Selected: [${selectedPoint.lat.toFixed(4)}°, ${selectedPoint.lon.toFixed(4)}°] (${mode.toUpperCase()})`;
-    }
-}
-
+/* ==========================================================================
+   2. CONTROLS, SEARCH & AREA MODES
+   ========================================================================== */
 function initMapControls() {
-    // Area Mode (Scope) Buttons
+    // Footprint Mode Selector
     document.querySelectorAll('.area-mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const mode = btn.getAttribute('data-area-mode');
-            setAreaMode(mode);
+            document.querySelectorAll('.area-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentAreaMode = btn.dataset.areaMode;
         });
     });
 
-    // Quick Jumps Dropdown
-    const jumpSelect = document.getElementById('map-quick-jump');
-    if (jumpSelect) {
-        jumpSelect.addEventListener('change', (e) => {
-            const locKey = e.target.value;
-            if (PRESET_LOCATIONS[locKey]) {
-                const loc = PRESET_LOCATIONS[locKey];
-                selectedPoint = { lat: loc.lat, lon: loc.lon, zoom: loc.zoom, name: loc.name };
-                hydroMap.flyTo([loc.lat, loc.lon], loc.zoom, { duration: 1.4 });
+    // Preset dropdown
+    const quickJump = document.getElementById('map-quick-jump');
+    if (quickJump) {
+        quickJump.addEventListener('change', (e) => {
+            const loc = PRESET_LOCATIONS[e.target.value];
+            if (loc && hydroMap) {
+                selectedPoint = { ...loc };
+                hydroMap.flyTo([loc.lat, loc.lon], loc.zoom, { duration: 1.2 });
                 setTimeout(() => {
                     placeBeacon(loc.lat, loc.lon, loc.name);
-                }, 1500);
+                }, 1300);
             }
         });
     }
 
-    // Primary Action Button: Segment Selected Target Beacon or Full Viewport
-    const segmentSelectedBtn = document.getElementById('btn-segment-selected');
-    if (segmentSelectedBtn) {
-        segmentSelectedBtn.addEventListener('click', () => {
-            const zoom = hydroMap.getZoom();
-            if (currentAreaMode === 'viewport') {
-                const center = hydroMap.getCenter();
-                executeGeoInference(center.lat, center.lng, zoom);
-            } else {
-                executeGeoInference(selectedPoint.lat, selectedPoint.lon, zoom);
-            }
-        });
-    }
-
-    // Secondary Action Button: Segment Current Map Center View
-    const segmentCenterBtn = document.getElementById('btn-segment-center');
-    if (segmentCenterBtn) {
-        segmentCenterBtn.addEventListener('click', () => {
-            const center = hydroMap.getCenter();
-            const zoom = hydroMap.getZoom();
-            selectedPoint = { lat: center.lat, lon: center.lng, zoom: zoom, name: 'Map Center' };
-            placeBeacon(center.lat, center.lng, 'Map Center');
-            executeGeoInference(center.lat, center.lng, zoom);
-        });
-    }
-
-    // Geocoding Search: Button click & Enter key
-    const searchBtn = document.getElementById('btn-search-location');
+    // Geocoding Search
     const searchInput = document.getElementById('map-search-input');
-
+    const searchBtn = document.getElementById('btn-search-location');
     if (searchBtn && searchInput) {
-        searchBtn.addEventListener('click', () => {
-            handleSearchLocation(searchInput.value);
-        });
-
+        const doSearch = () => handleSearchLocation(searchInput.value);
+        searchBtn.addEventListener('click', doSearch);
         searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleSearchLocation(searchInput.value);
+            if (e.key === 'Enter') doSearch();
+        });
+    }
+
+    // Manual Analysis Trigger Button
+    const analyzeBtn = document.getElementById('btn-segment-selected');
+    if (analyzeBtn) {
+        analyzeBtn.addEventListener('click', () => {
+            if (selectedPoint) {
+                executeGeoInference(selectedPoint.lat, selectedPoint.lon, hydroMap.getZoom());
             }
         });
     }
 
-    // Mask Opacity Slider
+    // Opacity Slider
     const opacitySlider = document.getElementById('map-overlay-opacity');
     if (opacitySlider) {
         opacitySlider.addEventListener('input', (e) => {
@@ -258,83 +198,85 @@ function initMapControls() {
             }
         });
     }
+
+    // Retry Button
+    const retryBtn = document.getElementById('map-retry-btn');
+    if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+            if (selectedPoint) {
+                executeGeoInference(selectedPoint.lat, selectedPoint.lon, hydroMap.getZoom());
+            }
+        });
+    }
 }
 
 async function handleSearchLocation(query) {
     if (!query || !query.trim()) return;
-    const cleanQuery = query.trim();
+    const clean = query.trim();
 
-    // Check if query is GPS coordinates (e.g., "26.5, 56.5" or "26.5 56.5")
-    const coordPattern = /^([-+]?\d*\.?\d+)[,\s]+([-+]?\d*\.?\d+)$/;
-    const match = cleanQuery.match(coordPattern);
-    if (match) {
-        const lat = parseFloat(match[1]);
-        const lon = parseFloat(match[2]);
+    // Check GPS pattern (e.g. "22.45, 31.85")
+    const coordMatch = clean.match(/^([-+]?\d*\.?\d+)[,\s]+([-+]?\d*\.?\d+)$/);
+    if (coordMatch) {
+        const lat = parseFloat(coordMatch[1]);
+        const lon = parseFloat(coordMatch[2]);
         if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
-            selectedPoint = { lat, lon, zoom: 12, name: `GPS [${lat.toFixed(3)}, ${lon.toFixed(3)}]` };
+            selectedPoint = { lat, lon, zoom: 12, name: `GPS [${lat.toFixed(3)}°, ${lon.toFixed(3)}°]` };
             hydroMap.flyTo([lat, lon], 12, { duration: 1.2 });
-            setTimeout(() => {
-                placeBeacon(lat, lon, selectedPoint.name);
-            }, 1300);
+            setTimeout(() => placeBeacon(lat, lon, selectedPoint.name), 1300);
             return;
         }
     }
 
-    // Otherwise, query OpenStreetMap Nominatim Geocoding API
-    const searchBtn = document.getElementById('btn-search-location');
-    if (searchBtn) searchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-
+    // Nominatim OpenStreetMap Geocoding
     try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery)}`;
-        const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        if (!resp.ok) throw new Error('Geocoding search failed');
-        const results = await resp.json();
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error('Geocoding service unavailable');
+        const results = await res.json();
 
         if (results && results.length > 0) {
-            const topResult = results[0];
-            const lat = parseFloat(topResult.lat);
-            const lon = parseFloat(topResult.lon);
-            const shortName = topResult.name || cleanQuery;
+            const top = results[0];
+            const lat = parseFloat(top.lat);
+            const lon = parseFloat(top.lon);
+            const name = top.display_name.split(',')[0];
 
-            selectedPoint = { lat, lon, zoom: 12, name: shortName };
-            hydroMap.flyTo([lat, lon], 12, { duration: 1.5 });
-            setTimeout(() => {
-                placeBeacon(lat, lon, shortName);
-            }, 1600);
+            selectedPoint = { lat, lon, zoom: 12, name };
+            hydroMap.flyTo([lat, lon], 12, { duration: 1.4 });
+            setTimeout(() => placeBeacon(lat, lon, name), 1500);
         } else {
-            alert(`Location "${cleanQuery}" not found. You can enter direct GPS coordinates like: 26.5, 56.5`);
+            showNotification(`Location "${clean}" not found. Try GPS coordinates like: 22.45, 31.85`, 'warning');
         }
     } catch (err) {
-        console.error('Geocoding error:', err);
-    } finally {
-        if (searchBtn) searchBtn.innerHTML = 'Search';
+        showNotification(`Search error: ${err.message}`, 'error');
     }
 }
 
+/* ==========================================================================
+   3. SATELLITE TILE INFERENCE EXECUTION (STRICTLY HONEST)
+   ========================================================================== */
 async function executeGeoInference(lat, lon, zoom) {
     const loadingBadge = document.getElementById('map-loading-indicator');
     const metricsPanel = document.getElementById('map-metrics-panel');
+    const errorBanner = document.getElementById('map-error-banner');
     const actionLabel = document.getElementById('btn-segment-selected-label');
-    const popupStatus = document.getElementById('popup-status-text');
 
-    if (loadingBadge) loadingBadge.classList.remove('hidden');
-    if (actionLabel) actionLabel.textContent = 'Analyzing...';
-    if (popupStatus) {
-        popupStatus.style.display = 'block';
-        popupStatus.innerHTML = '<i class="fa-solid fa-satellite fa-spin"></i> Querying satellite tile...';
-    }
+    if (loadingBadge) loadingBadge.style.display = 'flex';
+    if (errorBanner) errorBanner.style.display = 'none';
+    if (actionLabel) actionLabel.textContent = 'Segmenting...';
+
+    const threshold = parseFloat(document.getElementById('threshold-slider')?.value || 0.50);
+
+    // Visible viewport bounds
+    const boundsObj = hydroMap.getBounds();
+    const viewport_bounds = [
+        [boundsObj.getSouth(), boundsObj.getWest()],
+        [boundsObj.getNorth(), boundsObj.getEast()]
+    ];
+
+    const getApiUrl = (endpoint) => window.HYDROFLOW_CONFIG?.apiUrl ? window.HYDROFLOW_CONFIG.apiUrl(endpoint) : endpoint;
 
     try {
-        const threshold = parseFloat(document.getElementById('threshold-slider')?.value || 0.5);
-
-        // Get visible map viewport bounds
-        const boundsObj = hydroMap.getBounds();
-        const viewport_bounds = [
-            [boundsObj.getSouth(), boundsObj.getWest()],
-            [boundsObj.getNorth(), boundsObj.getEast()]
-        ];
-
-        const resp = await fetch('/predict_geo', {
+        const resp = await fetch(getApiUrl('/predict_geo'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -343,146 +285,89 @@ async function executeGeoInference(lat, lon, zoom) {
                 zoom,
                 threshold,
                 area_mode: currentAreaMode,
-                viewport_bounds: viewport_bounds
+                viewport_bounds
             })
         });
 
-        let data = null;
         const contentType = resp.headers.get('content-type') || '';
+        let data = null;
 
         if (resp.ok && contentType.includes('application/json')) {
             data = await resp.json();
         } else {
-            let errorMsg = `Server response was not JSON (HTTP ${resp.status})`;
+            let errorMsg = `Server error HTTP ${resp.status}`;
             try {
                 if (contentType.includes('application/json')) {
                     const errObj = await resp.json();
-                    errorMsg = errObj.error || errorMsg;
+                    errorMsg = errObj.error?.message || errObj.error || errorMsg;
                 }
-            } catch (e) {
-                // Ignore parse error and keep descriptive message
-            }
+            } catch (e) {}
             throw new Error(errorMsg);
         }
 
-        // 1. Remove previous overlay and bounding box
-        if (currentGeoOverlay) {
-            hydroMap.removeLayer(currentGeoOverlay);
-        }
-        if (currentBbox) {
-            hydroMap.removeLayer(currentBbox);
-        }
+        // Clean previous layers
+        if (currentGeoOverlay) hydroMap.removeLayer(currentGeoOverlay);
+        if (currentBbox) hydroMap.removeLayer(currentBbox);
 
-        // 2. Add Tile/Scope Footprint Bounding Box (Visual Boundary)
-        const bboxColor = data.water_percentage > 0.05 ? '#00e5ff' : '#f59e0b';
+        // Bounding Box footprint outline
         currentBbox = L.rectangle(data.bounds, {
-            color: bboxColor,
+            color: 'var(--water-data)',
             weight: 2,
-            dashArray: '5, 5',
-            fillColor: bboxColor,
-            fillOpacity: 0.05,
-            interactive: true
+            dashArray: '4, 4',
+            fillColor: 'var(--water-data)',
+            fillOpacity: 0.05
         }).addTo(hydroMap);
 
-        const scopeTitle = data.area_mode === 'viewport' ? 'Full Viewport Screen' : `${data.area_mode.toUpperCase()} Footprint`;
-        currentBbox.bindTooltip(
-            `<strong>${scopeTitle}</strong><br>Detected Water: <b>${data.water_percentage.toFixed(1)}%</b> (${data.water_pixels.toLocaleString()} px)`,
-            { sticky: true }
-        );
-
-        // 3. Render Transparent PNG Water Overlay onto Leaflet Map
+        // Overlay transparent PNG mask
         const opacity = parseFloat(document.getElementById('map-overlay-opacity')?.value || 0.85);
         currentGeoOverlay = L.imageOverlay(data.overlay_base64, data.bounds, {
             opacity: opacity,
             interactive: false
         }).addTo(hydroMap);
 
-        // 4. Update Geo Metrics Telemetry Panel
+        // Update telemetry panel
         if (metricsPanel) {
-            metricsPanel.classList.remove('hidden');
-            document.getElementById('geo-water-pct').textContent = `${data.water_percentage.toFixed(1)}%`;
-            document.getElementById('geo-water-px').textContent = `${data.water_pixels.toLocaleString()} px`;
-            document.getElementById('geo-latency').textContent = `${data.latency_ms.toFixed(0)} ms`;
-            document.getElementById('geo-bounds').textContent = `[${data.bounds[0][0].toFixed(3)}, ${data.bounds[0][1].toFixed(3)}] to [${data.bounds[1][0].toFixed(3)}, ${data.bounds[1][1].toFixed(3)}]`;
+            metricsPanel.style.display = 'block';
+            const pctEl = document.getElementById('geo-water-pct');
+            const pxEl = document.getElementById('geo-water-px');
+            const latEl = document.getElementById('geo-latency');
+            if (pctEl) pctEl.textContent = `${data.water_percentage.toFixed(1)}%`;
+            if (pxEl) pxEl.textContent = data.water_pixels.toLocaleString();
+            if (latEl) latEl.textContent = `${data.latency_ms.toFixed(0)} ms`;
         }
 
-        // 5. Update Popup Status
-        if (popupStatus) {
-            if (data.water_percentage > 0.05) {
-                popupStatus.innerHTML = `<span style="color:#00e5ff;">🌊 Water: <b>${data.water_percentage.toFixed(1)}%</b> (${data.water_pixels.toLocaleString()} px)</span>`;
-            } else {
-                popupStatus.innerHTML = `<span style="color:#fbbf24;">🏜️ 0.0% Water (Arid / Land Area)</span>`;
-            }
+        const statusBadge = document.getElementById('map-target-status');
+        if (statusBadge) {
+            statusBadge.textContent = `${data.water_percentage.toFixed(1)}% Water`;
         }
 
     } catch (err) {
-        console.warn('Geo inference server issue, triggering resilient fallback:', err);
-        
-        // Resilient Fallback: Generate valid demonstration overlay so user experience never breaks
-        renderFallbackGeoOverlay(lat, lon, zoom, currentAreaMode);
+        console.warn('Map inference failed:', err);
 
-        if (popupStatus) {
-            popupStatus.innerHTML = `<span style="color:#38bdf8;">🌊 Analysis Ready (Verified Demo Mode)</span>`;
+        // STRICTLY HONEST: NO FAKE WATER CONTOURS OR HARDCODED METRICS
+        if (currentGeoOverlay) {
+            hydroMap.removeLayer(currentGeoOverlay);
+            currentGeoOverlay = null;
         }
+        if (currentBbox) {
+            hydroMap.removeLayer(currentBbox);
+            currentBbox = null;
+        }
+        if (metricsPanel) metricsPanel.style.display = 'none';
+
+        if (errorBanner) {
+            errorBanner.style.display = 'flex';
+            const msgEl = document.getElementById('map-error-msg');
+            if (msgEl) {
+                msgEl.textContent = `Analysis failed: ${err.message}. Live satellite segmentation requires active HydroFlow backend.`;
+            }
+        }
+
+        const statusBadge = document.getElementById('map-target-status');
+        if (statusBadge) statusBadge.textContent = 'Service Offline';
+
     } finally {
-        if (loadingBadge) loadingBadge.classList.add('hidden');
-        const defaultLabel = currentAreaMode === 'viewport' ? 'Analyze Full Viewport Screen' : `Analyze Target (${currentAreaMode.toUpperCase()})`;
-        if (actionLabel) actionLabel.textContent = defaultLabel;
-    }
-}
-
-function renderFallbackGeoOverlay(lat, lon, zoom, area_mode) {
-    if (!hydroMap) return;
-
-    // Calculate approximate bounding box based on area mode
-    let delta = 0.04;
-    if (area_mode === 'medium') delta = 0.08;
-    if (area_mode === 'large') delta = 0.14;
-    if (area_mode === 'viewport') {
-        const boundsObj = hydroMap.getBounds();
-        delta = Math.abs(boundsObj.getNorth() - boundsObj.getSouth()) / 2;
-    }
-
-    const bounds = [
-        [lat - delta, lon - delta],
-        [lat + delta, lon + delta]
-    ];
-
-    if (currentGeoOverlay) hydroMap.removeLayer(currentGeoOverlay);
-    if (currentBbox) hydroMap.removeLayer(currentBbox);
-
-    currentBbox = L.rectangle(bounds, {
-        color: '#00e5ff',
-        weight: 2,
-        dashArray: '5, 5',
-        fillColor: '#00e5ff',
-        fillOpacity: 0.05,
-        interactive: true
-    }).addTo(hydroMap);
-
-    // Create realistic water contour canvas overlay
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.45)';
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.9)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.ellipse(128, 128, 95, 65, Math.PI / 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    const overlayUrl = canvas.toDataURL('image/png');
-    const opacity = parseFloat(document.getElementById('map-overlay-opacity')?.value || 0.85);
-    currentGeoOverlay = L.imageOverlay(overlayUrl, bounds, { opacity }).addTo(hydroMap);
-
-    const metricsPanel = document.getElementById('map-metrics-panel');
-    if (metricsPanel) {
-        metricsPanel.classList.remove('hidden');
-        document.getElementById('geo-water-pct').textContent = '53.5%';
-        document.getElementById('geo-water-px').textContent = '8,765 px';
-        document.getElementById('geo-latency').textContent = '22 ms';
-        document.getElementById('geo-bounds').textContent = `[${bounds[0][0].toFixed(3)}, ${bounds[0][1].toFixed(3)}] to [${bounds[1][0].toFixed(3)}, ${bounds[1][1].toFixed(3)}]`;
+        if (loadingBadge) loadingBadge.style.display = 'none';
+        if (actionLabel) actionLabel.textContent = 'Analyze Target Point';
     }
 }

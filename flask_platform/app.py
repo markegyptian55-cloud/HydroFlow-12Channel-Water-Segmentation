@@ -81,7 +81,14 @@ tile_cache = LRUTileCache(maxsize=128)
 # Initialize standalone inference engine (ONNX Runtime with PyTorch eager fallback)
 print("Initializing HydroFlow Water Inference Engine...")
 engine = WaterInferenceEngine()
-print(f"Inference engine active on {engine.device} (backend: {engine.backend})")
+def make_error_response(code: str, message: str, status_code: int = 400):
+    """Standardized API error response format: {error: {code, message}}"""
+    return jsonify({
+        "error": {
+            "code": code,
+            "message": message
+        }
+    }), status_code
 
 
 @app.route("/", methods=["GET"])
@@ -148,7 +155,7 @@ def health():
 def get_samples():
     """Returns metadata for the 3 prepackaged validation test samples."""
     if not os.path.exists(SAMPLES_META_PATH):
-        return jsonify({"error": "Samples metadata file not found"}), 404
+        return make_error_response("SAMPLES_NOT_FOUND", "Samples metadata file not found", 404)
         
     with open(SAMPLES_META_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -197,7 +204,7 @@ def predict():
             input_data = sample_path
             filename = f"{clean_id}.tif"
         else:
-            return jsonify({"error": f"Sample '{clean_id}' not found in {SAMPLES_DIR}"}), 404
+            return make_error_response("SAMPLE_NOT_FOUND", f"Sample '{clean_id}' not found in {SAMPLES_DIR}", 404)
 
     # Check for uploaded multipart file
     if input_data is None:
@@ -222,20 +229,22 @@ def predict():
             filename = "base64_scene.png"
 
     if input_data is None:
-        return jsonify({
-            "error": "No input provided. Upload a file via multipart form-data ('file'), specify a 'sample_id', or provide 'image_base64'."
-        }), 400
+        return make_error_response(
+            "MISSING_INPUT",
+            "No input provided. Upload a file via multipart form-data ('file'), specify a 'sample_id', or provide 'image_base64'.",
+            400
+        )
 
     try:
         # Execute inference pipeline
         res = engine.predict(input_data, threshold=threshold)
     except (ValueError, TypeError) as e:
-        return jsonify({"error": f"Invalid input image or unsupported format: {str(e)}"}), 400
+        return make_error_response("INVALID_IMAGE_FORMAT", f"Invalid input image or unsupported format: {str(e)}", 400)
     except Exception as e:
         err_msg = str(e)
         if "cannot identify image" in err_msg.lower() or "not a tiff" in err_msg.lower() or "unidentified" in err_msg.lower():
-            return jsonify({"error": f"Invalid image file format or corrupted file: {err_msg}"}), 400
-        return jsonify({"error": f"Inference execution failed: {err_msg}"}), 500
+            return make_error_response("CORRUPTED_FILE", f"Invalid image file format or corrupted file: {err_msg}", 400)
+        return make_error_response("INFERENCE_FAILED", f"Inference execution failed: {err_msg}", 500)
 
     # Handle binary PNG mask stream response (task 4 format=image)
     if req_format == "image":
@@ -250,9 +259,13 @@ def predict():
         return response
 
     # Handle rich JSON response (task 4 format=json)
+    is_multi = res.get("is_multispectral", True)
     return jsonify({
         "success": True,
         "filename": filename,
+        "is_multispectral": is_multi,
+        "input_channels": res.get("input_channels", 12),
+        "ood_warning": None if is_multi else "Notice: Optical 3-band RGB fallback detected. Model trained on 12 multispectral bands; results are indicative.",
         "water_percentage": res["water_percentage"],
         "water_pixels": res["water_pixels"],
         "total_pixels": res["total_pixels"],
@@ -289,7 +302,7 @@ def predict_geo():
         area_mode = str(data.get("area_mode", "small")).lower()
         viewport_bounds = data.get("viewport_bounds", None)
     except (ValueError, TypeError):
-        return jsonify({"error": "Invalid coordinates or zoom format."}), 400
+        return make_error_response("INVALID_COORDINATES", "Invalid coordinates or zoom format.", 400)
 
     # Base Web Mercator tile index calculation
     zoom = max(2, min(17, zoom))
@@ -373,9 +386,13 @@ def predict_geo():
         except Exception:
             pass
 
-    # Fallback to deterministic synthetic terrain generator
+    # If satellite imagery could not be fetched, return honest 502 error instead of fake synthetic data
     if raw_tile_img is None:
-        raw_tile_img = _generate_synthetic_geo_tile(lat, lon, zoom, size=(img_w, img_h))
+        return make_error_response(
+            "UPSTREAM_TILE_ERROR",
+            f"Satellite imagery could not be retrieved from provider for coordinates [{lat:.4f}, {lon:.4f}]. Please check network connectivity and retry.",
+            502
+        )
 
     # Resize image to multiple of 32 for U-Net architecture
     inf_w = max(128, min(512, (raw_tile_img.width // 32) * 32))
@@ -390,10 +407,10 @@ def predict_geo():
     h, w = bin_mask.shape
     rgba_overlay = np.zeros((h, w, 4), dtype=np.uint8)
     water_px = bin_mask > 0
-    # Vibrant Neon Cyan color for water: (0, 229, 255, 180)
+    # Water data overlay: (0, 212, 229, 180)
     rgba_overlay[water_px, 0] = 0
-    rgba_overlay[water_px, 1] = 229
-    rgba_overlay[water_px, 2] = 255
+    rgba_overlay[water_px, 1] = 212
+    rgba_overlay[water_px, 2] = 229
     rgba_overlay[water_px, 3] = 180
 
     transparent_mask_img = Image.fromarray(rgba_overlay, mode="RGBA")
@@ -405,6 +422,9 @@ def predict_geo():
         "coordinates": {"lat": lat, "lon": lon, "zoom": zoom},
         "area_mode": area_mode,
         "bounds": bounds,
+        "is_multispectral": False,
+        "input_channels": 3,
+        "ood_warning": "Notice: Map satellite imagery provides optical RGB bands. Multispectral bands B1, B5-B8A, B11-B12 are synthesized from RGB. Results are indicative.",
         "water_percentage": res["water_percentage"],
         "water_pixels": res["water_pixels"],
         "total_pixels": res["total_pixels"],
@@ -416,37 +436,19 @@ def predict_geo():
     })
 
 
-def _generate_synthetic_geo_tile(lat: float, lon: float, zoom: int, size: Tuple[int, int] = (256, 256)) -> Image.Image:
-    """Creates a deterministic satellite-like terrain tile for offline development."""
-    w, h = size
-    rng = np.random.RandomState(int((abs(lat) * 1000 + abs(lon) * 100) % 100000))
-    arr = np.zeros((h, w, 3), dtype=np.uint8)
-    # Sandy / arid baseline
-    arr[:, :, 0] = rng.randint(160, 200, (h, w))
-    arr[:, :, 1] = rng.randint(140, 180, (h, w))
-    arr[:, :, 2] = rng.randint(110, 150, (h, w))
-    # Water feature
-    y, x = np.ogrid[:h, :w]
-    water_shape = (x - w // 2)**2 + (y - h // 2)**2 < ((min(w, h) // 3)**2)
-    arr[water_shape, 0] = 20
-    arr[water_shape, 1] = 60
-    arr[water_shape, 2] = 130
-    return Image.fromarray(arr, mode="RGB")
-
-
 @app.errorhandler(413)
 def request_entity_too_large(error):
-    return jsonify({"error": "Uploaded file is too large. Max limit is 32MB."}), 413
+    return make_error_response("FILE_TOO_LARGE", "Uploaded file is too large. Max limit is 32MB.", 413)
 
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({"error": "Resource not found"}), 404
+    return make_error_response("NOT_FOUND", "Resource not found", 404)
 
 
 @app.errorhandler(500)
 def internal_error(error):
-    return jsonify({"error": "Internal server error occurred"}), 500
+    return make_error_response("INTERNAL_SERVER_ERROR", "Internal server error occurred", 500)
 
 
 if __name__ == "__main__":

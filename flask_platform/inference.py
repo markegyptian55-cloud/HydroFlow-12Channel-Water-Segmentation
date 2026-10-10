@@ -152,6 +152,7 @@ class WaterInferenceEngine:
 
         h, w = raw.shape[0], raw.shape[1]
         c = raw.shape[2]
+        self.last_input_channels = c
 
         if c == 12:
             return raw
@@ -403,6 +404,8 @@ class WaterInferenceEngine:
         return {
             "success": True,
             "dimensions": {"width": orig_w, "height": orig_h},
+            "is_multispectral": bool(getattr(self, "last_input_channels", 12) == 12),
+            "input_channels": int(getattr(self, "last_input_channels", 12)),
             "water_percentage": water_percentage,
             "water_pixels": water_pixels,
             "total_pixels": total_pixels,

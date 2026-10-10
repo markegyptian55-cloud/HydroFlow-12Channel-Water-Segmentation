@@ -20,20 +20,19 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BAND_MINS = [69.0, 100.0, 233.0, 104.0, 127.0, 14.0, 11.0, 64.0, 17.0, 17.0, 10.0, 0.0]
 BAND_MAXS = [941.0, 1143.0, 1733.0, 2478.0, 4046.0, 4453.0, 3761.0, 224.0, 1902.0, 1907.0, 80.0, 98.0]
 
-# Sentinel-2 Multispectral Band Metadata
 BAND_NAMES = [
-    "B1 (Coastal Aerosol)",
-    "B2 (Blue)",
-    "B3 (Green)",
-    "B4 (Red)",
-    "B5 (Vegetation RedEdge 1)",
-    "B6 (Vegetation RedEdge 2)",
-    "B7 (Vegetation RedEdge 3)",
-    "B8 (Near-Infrared NIR)",
-    "B8A (Narrow NIR)",
-    "B9 (Water Vapour)",
-    "B11 (Shortwave Infrared SWIR-1)",
-    "B12 (Shortwave Infrared SWIR-2)"
+    "Band 0: Coastal / Aerosol",
+    "Band 1: Blue",
+    "Band 2: Green",
+    "Band 3: Red",
+    "Band 4: NIR (Water Absorption)",
+    "Band 5: SWIR 1",
+    "Band 6: SWIR 2",
+    "Band 7: QA_PIXEL Bitmask",
+    "Band 8: Auxiliary / Thermal IR",
+    "Band 9: Water Vapour / Thermal",
+    "Band 10: ESA WorldCover LULC (80=Water)",
+    "Band 11: JRC Water Occurrence (0-100%)"
 ]
 
 # True color RGB band indices (0-indexed): B4 (Red), B3 (Green), B2 (Blue)

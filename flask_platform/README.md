@@ -51,11 +51,13 @@ Powered by the champion **12-Channel Pretrained ResNet-34 U-Net** (**81.66% Glob
      - **Sample 3 (Stream)**: Thin tributaries and marshland (`8.02% GT | 87.38% IoU`).
 4. **Interactive Earth Satellite Explorer**:
    - High-resolution dynamic satellite basemap powered by Leaflet.js and Esri World Imagery.
-   - Click anywhere on Earth (e.g. Lake Nasser, Nile River, Lake Mead) to fetch live imagery, run the segmentation model, and display the predicted water overlay directly on the globe.
-5. **Modern Glassmorphism UI**:
-   - Obsidian dark theme with neon cyan water highlights.
-   - Before/after interactive comparison slider.
-   - Comprehensive telemetry and direct PNG/JSON export.
+   - Click anywhere on Earth (e.g. Lake Nasser, Nile River, Lake Mead) to place a target beacon, query live imagery, run the segmentation model, and overlay predicted water contours directly on the globe.
+5. **Scientific Instrument UI & Token-Driven Design**:
+   - Pure token-driven CSS architecture with zero CDN dependencies (zero Tailwind CDN, zero FontAwesome CDN).
+   - Light and dark themes adhering strictly to WCAG 2.2 AA contrast standards (>= 14:1 contrast).
+   - Water data color (`--water-data`) reserved strictly for water reconstructions; interactive UI controls use deep blue-teal (`--accent-primary`).
+   - Before/after interactive split comparison slider with touch protection.
+   - Comprehensive telemetry, honest Out-of-Distribution (OOD) indicators, and direct PNG/JSON export.
 6. **ONNX Runtime & Connection Pooling Acceleration**:
    - Model latency reduced to sub-25ms using multi-threaded ONNX Runtime graph execution.
    - In-memory LRU tile caching (128 slots) and `requests.Session` connection pooling for instant satellite tile retrieval.

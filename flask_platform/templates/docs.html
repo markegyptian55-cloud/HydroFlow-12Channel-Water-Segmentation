@@ -1,161 +1,170 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-theme="dark" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HydroFlow API Documentation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>HydroFlow | REST API Documentation</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
-    <!-- Navbar -->
-    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-slate-950 font-bold">
-                    <i class="fa-solid fa-water"></i>
-                </div>
-                <span class="font-extrabold text-lg text-white">HydroFlow <span class="text-cyan-400 font-mono text-sm">REST API</span></span>
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="brand-section">
+            <a href="/" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--water-data)" stroke-width="2">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    <path d="M6 15c2-1 4-1 6 0 2 1 4 1 6 0"/>
+                </svg>
+                <span class="brand-title">HydroFlow <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">REST API</span></span>
             </a>
-            <div class="flex items-center gap-4 text-xs font-mono">
-                <a href="/" class="text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-1.5">
-                    <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-                </a>
-                <span class="px-2.5 py-1 rounded bg-slate-800 text-emerald-400 border border-slate-700">v2.4 Live</span>
-            </div>
+            <span class="brand-tag">v3.0 Specification</span>
+        </div>
+
+        <div class="header-actions">
+            <a href="/" class="btn-secondary" style="text-decoration: none;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                <span>Dashboard</span>
+            </a>
+            <button id="theme-toggle" class="btn-icon" title="Toggle theme">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-6 py-10 space-y-12">
-        <!-- Overview -->
-        <div class="space-y-4">
-            <h1 class="text-3xl font-extrabold tracking-tight text-white">HydroFlow Water Intelligence API Specification</h1>
-            <p class="text-slate-400 text-sm max-w-3xl leading-relaxed">
-                HydroFlow exposes high-throughput endpoints for multispectral Sentinel-2 water segmentation. Designed to meet the requirements of <strong class="text-cyan-300">task 4.pdf</strong>, supporting dual outputs: raw binary mask stream (<code class="text-cyan-400">format=image</code>) and rich analytical payload (<code class="text-cyan-400">format=json</code>).
-            </p>
-        </div>
-
-        <!-- Endpoint 1: POST /predict -->
-        <div class="glass-panel rounded-2xl p-6 sm:p-8 space-y-6">
-            <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono text-xs font-bold uppercase">POST</span>
-                <h2 class="text-xl font-bold font-mono text-white">/predict</h2>
+    <main class="app-main docs-container">
+        <div class="panel" style="margin-bottom: 24px;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    <span>HydroFlow Water Intelligence API Specification</span>
+                </div>
+                <span class="sample-badge">Task 4 Production API</span>
             </div>
-            <p class="text-xs text-slate-400 leading-relaxed">
-                Executes deep learning inference on an uploaded multispectral GeoTIFF or preset sample scene. Returns either a binary PNG mask or full JSON telemetry.
+
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
+                HydroFlow exposes high-throughput endpoints for multispectral Sentinel-2 water segmentation. Designed to meet the requirements of <strong>task 4.pdf</strong>, supporting dual outputs: raw binary mask stream (<span class="font-mono">format=image</span>) and rich analytical payload (<span class="font-mono">format=json</span>).
             </p>
 
-            <!-- Query Parameters Table -->
-            <div class="space-y-2">
-                <h3 class="text-xs font-bold uppercase font-mono text-slate-300">Query & Form Parameters</h3>
-                <div class="overflow-x-auto rounded-xl border border-slate-800">
-                    <table class="w-full text-xs font-mono text-left">
-                        <thead class="bg-slate-900 text-slate-400">
-                            <tr>
-                                <th class="p-3">Parameter</th>
-                                <th class="p-3">Type</th>
-                                <th class="p-3">Required</th>
-                                <th class="p-3">Default</th>
-                                <th class="p-3">Description</th>
+            <!-- POST /predict -->
+            <div style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border-subtle);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: var(--accent-subtle); color: var(--accent-primary); border: 1px solid var(--accent-border);">POST</span>
+                    <h2 style="font-size: 16px; font-weight: 700; font-family: monospace;">/predict</h2>
+                </div>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                    Executes deep learning inference on an uploaded multispectral GeoTIFF or preset sample scene. Returns either a binary PNG mask or full JSON telemetry.
+                </p>
+
+                <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 14px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
+                        <thead>
+                            <tr style="background: var(--surface-subtle); border-bottom: 1px solid var(--border-subtle);">
+                                <th style="padding: 6px 10px;">Parameter</th>
+                                <th style="padding: 6px 10px;">Type</th>
+                                <th style="padding: 6px 10px;">Default</th>
+                                <th style="padding: 6px 10px;">Description</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/80 text-slate-300">
-                            <tr>
-                                <td class="p-3 text-cyan-400 font-bold">format</td>
-                                <td class="p-3 text-slate-400">string</td>
-                                <td class="p-3 text-slate-400">No</td>
-                                <td class="p-3 text-white">json</td>
-                                <td class="p-3 text-slate-400"><code class="text-cyan-300">image</code> returns PNG binary stream; <code class="text-cyan-300">json</code> returns metrics & base64</td>
+                        <tbody style="font-family: monospace;">
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 6px 10px; color: var(--accent-primary); font-weight: 600;">format</td>
+                                <td style="padding: 6px 10px;">query</td>
+                                <td style="padding: 6px 10px;">json</td>
+                                <td style="padding: 6px 10px; font-family: sans-serif; color: var(--text-secondary);"><code class="font-mono">image</code> returns PNG binary stream; <code class="font-mono">json</code> returns metrics and base64 assets</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 6px 10px; color: var(--accent-primary); font-weight: 600;">threshold</td>
+                                <td style="padding: 6px 10px;">query/form</td>
+                                <td style="padding: 6px 10px;">0.50</td>
+                                <td style="padding: 6px 10px; font-family: sans-serif; color: var(--text-secondary);">Sigmoid decision threshold in range [0.01, 0.99]</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 6px 10px; color: var(--accent-primary); font-weight: 600;">file</td>
+                                <td style="padding: 6px 10px;">multipart</td>
+                                <td style="padding: 6px 10px;">none</td>
+                                <td style="padding: 6px 10px; font-family: sans-serif; color: var(--text-secondary);">Uploaded raster payload (.tif / .png / .jpg) up to 32 MB</td>
                             </tr>
                             <tr>
-                                <td class="p-3 text-cyan-400 font-bold">threshold</td>
-                                <td class="p-3 text-slate-400">float</td>
-                                <td class="p-3 text-slate-400">No</td>
-                                <td class="p-3 text-white">0.50</td>
-                                <td class="p-3 text-slate-400">Sigmoid decision threshold in range [0.01, 0.99]</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 text-cyan-400 font-bold">file</td>
-                                <td class="p-3 text-slate-400">binary</td>
-                                <td class="p-3 text-amber-400">Conditional</td>
-                                <td class="p-3 text-slate-500">None</td>
-                                <td class="p-3 text-slate-400">Multipart file payload (.tif / .png / .jpg)</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 text-cyan-400 font-bold">sample_id</td>
-                                <td class="p-3 text-slate-400">string</td>
-                                <td class="p-3 text-amber-400">Conditional</td>
-                                <td class="p-3 text-slate-500">None</td>
-                                <td class="p-3 text-slate-400">Direct identifier for bundled presets (<code class="text-cyan-300">sample_1_lake</code>, <code class="text-cyan-300">sample_2_river</code>, <code class="text-cyan-300">sample_3_stream</code>)</td>
+                                <td style="padding: 6px 10px; color: var(--accent-primary); font-weight: 600;">sample_id</td>
+                                <td style="padding: 6px 10px;">query/json</td>
+                                <td style="padding: 6px 10px;">none</td>
+                                <td style="padding: 6px 10px; font-family: sans-serif; color: var(--text-secondary);">Identifier for prepackaged scenes (<code class="font-mono">sample_1_lake</code>, <code class="font-mono">sample_2_river</code>, <code class="font-mono">sample_3_stream</code>)</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
 
-            <!-- Code Snippets -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-                <div class="space-y-2">
-                    <span class="text-xs font-mono text-cyan-400 font-bold">cURL (Binary PNG Mask Download)</span>
-                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>curl -X POST "http://localhost:5000/predict?format=image" \
+                <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">cURL &bull; Download Binary Mask Stream (task 4.pdf requirement)</div>
+                <pre class="code-block"><code>curl -X POST "http://localhost:5000/predict?format=image" \
   -F "file=@sample_1_lake.tif" \
-  -F "threshold=0.5" \
+  -F "threshold=0.50" \
   --output water_mask.png</code></pre>
-                </div>
 
-                <div class="space-y-2">
-                    <span class="text-xs font-mono text-cyan-400 font-bold">Python requests (JSON Telemetry)</span>
-                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>import requests
+                <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-top: 10px; margin-bottom: 4px;">Python requests &bull; JSON Inference with Telemetry</div>
+                <pre class="code-block"><code>import requests
 
 url = "http://localhost:5000/predict?format=json"
-files = {"file": open("sample_1_lake.tif", "rb")}
-resp = requests.post(url, files=files)
-print(resp.json())</code></pre>
+with open("sample_1_lake.tif", "rb") as f:
+    resp = requests.post(url, files={"file": f}, data={"threshold": 0.50})
+
+result = resp.json()
+print("Water Coverage:", result["water_percentage"], "%")
+print("Water Pixels:  ", result["water_pixels"], "/", result["total_pixels"])</code></pre>
+            </div>
+
+            <!-- POST /predict_geo -->
+            <div style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border-subtle);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: var(--accent-subtle); color: var(--accent-primary); border: 1px solid var(--accent-border);">POST</span>
+                    <h2 style="font-size: 16px; font-weight: 700; font-family: monospace;">/predict_geo</h2>
                 </div>
-            </div>
-        </div>
-
-        <!-- Endpoint 2: POST /predict_geo -->
-        <div class="glass-panel rounded-2xl p-6 sm:p-8 space-y-6">
-            <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono text-xs font-bold uppercase">POST</span>
-                <h2 class="text-xl font-bold font-mono text-white">/predict_geo</h2>
-            </div>
-            <p class="text-xs text-slate-400 leading-relaxed">
-                Accepts GPS coordinates and zoom level, fetches live optical satellite imagery tile, executes water segmentation, and returns an alpha mask overlay with exact bounds for Leaflet ImageOverlay.
-            </p>
-
-            <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>curl -X POST "http://localhost:5000/predict_geo" \
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+                    Fetches satellite imagery for specified GPS coordinates and returns predicted water contour with geospatial bounds.
+                </p>
+                <pre class="code-block"><code>curl -X POST "http://localhost:5000/predict_geo" \
   -H "Content-Type: application/json" \
-  -d '{"lat": 23.97, "lon": 32.88, "zoom": 13, "threshold": 0.5}'</code></pre>
-        </div>
-
-        <!-- Endpoint 3 & 4: GET /samples and GET /health -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass-panel rounded-2xl p-6 space-y-4">
-                <div class="flex items-center gap-3">
-                    <span class="px-3 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono text-xs font-bold uppercase">GET</span>
-                    <h3 class="text-base font-bold font-mono text-white">/samples</h3>
-                </div>
-                <p class="text-xs text-slate-400">
-                    Returns metadata, ground truth values, and asset paths for all 3 bundled validation scenes.
-                </p>
-                <pre class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono text-slate-300"><code>curl http://localhost:5000/samples</code></pre>
+  -d '{"lat": 22.45, "lon": 31.85, "zoom": 12, "threshold": 0.50, "area_mode": "small"}'</code></pre>
             </div>
 
-            <div class="glass-panel rounded-2xl p-6 space-y-4">
-                <div class="flex items-center gap-3">
-                    <span class="px-3 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono text-xs font-bold uppercase">GET</span>
-                    <h3 class="text-base font-bold font-mono text-white">/health</h3>
+            <!-- GET /samples and GET /health -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: var(--status-success-bg); color: var(--status-success); border: 1px solid var(--status-success-border);">GET</span>
+                        <h3 style="font-size: 14px; font-weight: 700; font-family: monospace;">/samples</h3>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Lists prepackaged validation scenes with metadata.</p>
+                    <pre class="code-block"><code>curl http://localhost:5000/samples</code></pre>
                 </div>
-                <p class="text-xs text-slate-400">
-                    Returns service health, loaded PyTorch device, backbone parameters, and global benchmark IoU metrics.
-                </p>
-                <pre class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono text-slate-300"><code>curl http://localhost:5000/health</code></pre>
+
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: var(--status-success-bg); color: var(--status-success); border: 1px solid var(--status-success-border);">GET</span>
+                        <h3 style="font-size: 14px; font-weight: 700; font-family: monospace;">/health</h3>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Returns model device, ONNX status, and benchmark inventory.</p>
+                    <pre class="code-block"><code>curl http://localhost:5000/health</code></pre>
+                </div>
             </div>
+
         </div>
     </main>
+
+    <footer class="app-footer">
+        <div>HydroFlow Platform &copy; 2026 &bull; REST API Specification</div>
+        <div class="footer-links">
+            <a href="/" class="footer-link">Dashboard</a>
+            <a href="/health" target="_blank" class="footer-link">/health</a>
+            <a href="/samples" target="_blank" class="footer-link">/samples</a>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+        });
+    </script>
 </body>
 </html>

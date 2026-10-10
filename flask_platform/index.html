@@ -1,661 +1,604 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-theme="dark" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HydroFlow Platform | Multispectral Water Segmentation</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            /* Light Mode Variables */
-            --color-bg-dark-900: #f8fafc;
-            --color-bg-slate-900: #f1f5f9;
-            --color-bg-slate-800: #e2e8f0;
-            --color-bg-slate-700: #cbd5e1;
-            
-            --color-text-slate-100: #0f172a;
-            --color-text-slate-200: #1e293b;
-            --color-text-slate-300: #334155;
-            --color-text-slate-400: #475569;
-            --color-text-slate-500: #64748b;
-            
-            --color-border-slate-800: #cbd5e1;
-            --color-border-slate-700: #94a3b8;
-            --color-border-slate-600: #cbd5e1;
-            
-            --color-bg-cyan-950: #cffafe;
-        }
-        .dark {
-            /* Dark Mode Variables (Original UI) */
-            --color-bg-dark-900: #070b12;
-            --color-bg-slate-900: #0f172a;
-            --color-bg-slate-800: #1e293b;
-            --color-bg-slate-700: #334155;
-            
-            --color-text-slate-100: #f1f5f9;
-            --color-text-slate-200: #e2e8f0;
-            --color-text-slate-300: #cbd5e1;
-            --color-text-slate-400: #94a3b8;
-            --color-text-slate-500: #64748b;
-            
-            --color-border-slate-800: #1e293b;
-            --color-border-slate-700: #334155;
-            --color-border-slate-600: #475569;
-            
-            --color-bg-cyan-950: #083344;
-        }
-    </style>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: {
-                            900: 'var(--color-bg-dark-900)',
-                        },
-                        slate: {
-                            900: 'var(--color-bg-slate-900)',
-                            800: 'var(--color-bg-slate-800)',
-                            700: 'var(--color-bg-slate-700)',
-                            600: 'var(--color-border-slate-600)',
-                            500: 'var(--color-text-slate-500)',
-                            400: 'var(--color-text-slate-400)',
-                            300: 'var(--color-text-slate-300)',
-                            200: 'var(--color-text-slate-200)',
-                            100: 'var(--color-text-slate-100)',
-                        },
-                        cyan: {
-                            950: 'var(--color-bg-cyan-950)'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome 6 Icons CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Leaflet.js CSS & JS CDN -->
+    <title>HydroFlow | Multispectral Surface Water Intelligence</title>
+    <meta name="description" content="Scientific instrument for surface water detection in Sentinel-2 multispectral imagery using a 12-channel ResNet-34 U-Net (81.66% IoU).">
+
+    <!-- Leaflet.js CSS CDN -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- HydroFlow Token-Driven Design System (Zero Tailwind CDN) -->
+    <link rel="stylesheet" href="/static/css/style.css?v=3.1">
 </head>
-<body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-dark-900">
+<body>
 
-    <!-- Top Navigation Bar -->
-    <header class="border-b border-slate-800 bg-dark-900/90 backdrop-blur-md sticky top-0 z-40">
-        <div class="w-full max-w-[96%] 2xl:max-w-[1850px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Brand -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                    <i class="fa-solid fa-water text-dark-900 text-xl font-bold"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">HydroFlow</span>
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-400 border border-cyan-800 font-mono font-medium">Platform v2.4</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400 hidden sm:block">Multispectral Sentinel-2 Water Intelligence</p>
-                </div>
+    <!-- Application Header -->
+    <header class="app-header">
+        <div class="brand-section">
+            <div class="brand-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--water-data)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    <path d="M6 15c2-1 4-1 6 0 2 1 4 1 6 0"/>
+                </svg>
+                <span>HydroFlow</span>
+                <span class="brand-tag">v3.0 MVP</span>
             </div>
 
-            <!-- Model & Hardware Badges -->
-            <div class="hidden md:flex items-center gap-2">
-                <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-xs font-mono">
-                    <i class="fa-solid fa-brain text-cyan-400"></i>
-                    <span class="text-slate-300 font-medium">ResNet-34 U-Net</span>
-                    <span class="text-emerald-400 font-bold">IoU 81.66%</span>
-                </div>
-                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-xs font-mono">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span class="text-slate-300">CPU / ONNX</span>
-                </div>
+            <!-- Model Badge -->
+            <div class="sample-badge header-model-badge">
+                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--status-success);"></span>
+                <span>ResNet-34 U-Net (12-ch) &bull; IoU 81.66% &bull; CPU</span>
             </div>
+        </div>
 
-            <!-- Navigation Tabs -->
-            <nav class="flex items-center gap-1 sm:gap-2">
-                <button data-target="tab-inference" class="tab-btn active px-3.5 py-2 rounded-lg text-sm font-semibold border-b-2 border-cyan-400 text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <span class="hidden sm:inline">Local Inference</span>
-                </button>
-                <button data-target="tab-map" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-earth-americas"></i>
-                    <span class="hidden sm:inline">Earth Explorer</span>
-                </button>
-                <button data-target="tab-docs" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-code"></i>
-                    <span class="hidden sm:inline">API Docs</span>
-                </button>
-                <a href="/docs" target="_blank" class="p-2 text-slate-400 hover:text-cyan-400 transition-colors text-sm" title="Open Full Docs">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>
-                <button id="theme-toggle" class="p-2 ml-1 text-slate-400 hover:text-cyan-400 transition-colors text-sm" title="Toggle Light/Dark Theme">
-                    <i class="fa-solid fa-sun hidden" id="theme-icon-light"></i>
-                    <i class="fa-solid fa-moon" id="theme-icon-dark"></i>
-                </button>
-            </nav>
+        <!-- Workspace Tabs -->
+        <nav class="workspace-nav" aria-label="Main Navigation">
+            <button data-target="tab-analyze" class="nav-tab active" id="tab-btn-analyze">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Analyze</span>
+            </button>
+            <button data-target="tab-map" class="nav-tab" id="tab-btn-map">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>Earth Explorer</span>
+            </button>
+            <button data-target="tab-api" class="nav-tab" id="tab-btn-api">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <span>API Specs</span>
+            </button>
+            <button data-target="tab-specs" class="nav-tab" id="tab-btn-specs">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Specifications</span>
+            </button>
+        </nav>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+            <button id="theme-toggle" class="btn-icon" title="Toggle Light / Dark Theme" aria-label="Toggle theme">
+                <svg id="theme-icon-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg id="theme-icon-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <a href="https://github.com/markegyptian55-cloud/water-segmentation" target="_blank" rel="noopener noreferrer" class="btn-icon" title="GitHub Repository" aria-label="GitHub Repository">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            </a>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-1 w-full max-w-[96%] 2xl:max-w-[1850px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Main Workspace -->
+    <main class="app-main" id="main-content">
 
         <!-- ========================================== -->
-        <!-- TAB 1: LOCAL MULTISPECTRAL INFERENCE       -->
+        <!-- TAB 1: WORKBENCH (ANALYZE VIEW)           -->
         <!-- ========================================== -->
-        <section id="tab-inference" class="tab-pane space-y-8">
-            <!-- Hero Description -->
-            <div class="glass-panel rounded-2xl p-6 sm:p-8">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div class="space-y-2">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/80 text-cyan-400 text-xs font-semibold">
-                            <i class="fa-solid fa-satellite"></i> 12-Band Multispectral Pipeline
+        <section id="tab-analyze" class="tab-pane">
+            <div class="workbench-grid">
+                
+                <!-- Left Column: Controls & Input -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span>Raster Input</span>
                         </div>
-                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                            Autonomous Water Segmentation
-                        </h1>
-                        <p class="text-slate-400 text-sm max-w-2xl leading-relaxed">
-                            Upload a raw 12-channel Sentinel-2 GeoTIFF or standard optical image. The model calibrates surface reflectance across optical, RedEdge, NIR, and SWIR bands to output pixel-level water boundaries.
-                        </p>
+                        <span class="sample-badge">Max 32 MB</span>
                     </div>
-                    <!-- Quick Stats Pill -->
-                    <div class="grid grid-cols-3 gap-3 text-center">
-                        <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                            <div class="text-xs text-slate-400 font-mono">Global IoU</div>
-                            <div class="text-lg font-bold text-cyan-400 font-mono">81.66%</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                            <div class="text-xs text-slate-400 font-mono">Precision</div>
-                            <div class="text-lg font-bold text-emerald-400 font-mono">91.48%</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                            <div class="text-xs text-slate-400 font-mono">Recall</div>
-                            <div class="text-lg font-bold text-blue-400 font-mono">88.39%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- 1-Click Test Presets Bar -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-flask-vial text-cyan-400"></i>
-                        <h2 class="text-base font-bold text-slate-200">Prepackaged Validation Scenes (1-Click Verification)</h2>
+                    <!-- Dropzone -->
+                    <div id="drop-zone" class="dropzone" tabindex="0" role="button" aria-label="Upload Sentinel-2 raster image">
+                        <input type="file" id="file-input" style="display: none;" accept=".tif,.tiff,.png,.jpg,.jpeg">
+                        <div class="dropzone-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+                        </div>
+                        <div class="dropzone-label">Drop Sentinel-2 scene here</div>
+                        <div class="dropzone-hint">Supports 12-band GeoTIFF (<span class="font-mono">.tif</span>) or optical (<span class="font-mono">.png, .jpg</span>)</div>
+                        <div style="margin-top: 10px;">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('file-input').click()" style="margin: 0 auto;">
+                                Browse Files
+                            </button>
+                        </div>
                     </div>
-                    <span class="text-xs text-slate-400">Click any card to trigger instant end-to-end inference</span>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <div data-sample-id="" 
-                         data-title="&lt;built-in method title of str object at 0x00000144BA9285F0&gt;"
-                         data-category=""
-                         class="sample-preset-card hover-spring glass-panel rounded-xl p-4 cursor-pointer hover:border-cyan-400 transition-all duration-200 group relative overflow-hidden">
-                        <div class="flex gap-4 items-center">
-                            <img src="" alt="&lt;built-in method title of str object at 0x00000144BA9285F0&gt;" class="w-20 h-20 rounded-lg object-cover border border-slate-700 group-hover:border-cyan-400 transition-colors shadow-md">
-                            <div class="space-y-1 flex-1 min-w-0">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-[11px] font-mono text-cyan-400 uppercase font-semibold"></span>
-                                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">IoU %</span>
+                    <!-- Selected File State -->
+                    <div id="file-status-row" style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-secondary);">
+                        <span id="selected-file-name" class="font-mono truncate" style="max-width: 220px;">No file selected</span>
+                        <span id="file-info-badge" class="sample-badge" style="display: none;"></span>
+                    </div>
+
+                    <!-- Prepackaged Validation Scenes -->
+                    <div style="margin-top: 16px;">
+                        <div class="control-label-row">
+                            <span class="control-label">Validation Scenes (1-Click)</span>
+                            <span class="sample-badge">Verified Ground Truth</span>
+                        </div>
+                        <div class="sample-chips" role="radiogroup" aria-label="Prepackaged validation scenes">
+                            
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_1_lake"
+                                 data-title="Sample 1: Inland Lake / Reservoir"
+                                 data-category="Lake / Reservoir"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="/static/samples/sample_1_lake_rgb.png" alt="Sample 1: Inland Lake / Reservoir" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 1: Inland Lake / Reservoir</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">76.9%</strong></div>
+                                    </div>
                                 </div>
-                                <h3 class="text-sm font-bold text-white truncate group-hover:text-cyan-300 transition-colors">&lt;built-in method title of str object at 0x00000144BA9285F0&gt;</h3>
-                                <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed"></p>
-                                <div class="pt-1 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                                    <span>GT Water: <strong class="text-cyan-300">%</strong></span>
-                                    <span class="text-cyan-400 font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                                        Test <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                                    </span>
+                                <span class="sample-badge">IoU 93.88%</span>
+                            </div>
+                            
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_2_river"
+                                 data-title="Sample 2: Meandering River & Shoreline"
+                                 data-category="River / Channel"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="/static/samples/sample_2_river_rgb.png" alt="Sample 2: Meandering River & Shoreline" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 2: Meandering River & Shoreline</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">35.28%</strong></div>
+                                    </div>
                                 </div>
+                                <span class="sample-badge">IoU 96.15%</span>
                             </div>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-
-            <!-- Upload & Execution Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Dropzone (2 Cols) -->
-                <div class="lg:col-span-2 glass-panel rounded-2xl p-6 sm:p-8 flex flex-col justify-between">
-                    <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-cyan-400/80 rounded-xl p-8 text-center cursor-pointer transition-all duration-200 bg-slate-900/40 relative">
-                        <input type="file" id="file-input" class="hidden" accept=".tif,.tiff,.png,.jpg,.jpeg">
-                        <div class="space-y-4">
-                            <div class="w-16 h-16 rounded-2xl bg-cyan-950/60 text-cyan-400 border border-cyan-800/80 mx-auto flex items-center justify-center text-2xl shadow-lg">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_3_stream"
+                                 data-title="Sample 3: Narrow Streams & Wetland"
+                                 data-category="Stream / Wetland"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="/static/samples/sample_3_stream_rgb.png" alt="Sample 3: Narrow Streams & Wetland" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 3: Narrow Streams & Wetland</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">8.02%</strong></div>
+                                    </div>
+                                </div>
+                                <span class="sample-badge">IoU 87.38%</span>
                             </div>
-                            <div>
-                                <p class="text-base font-semibold text-white">Drag & drop Sentinel-2 raster image here</p>
-                                <p class="text-xs text-slate-400 mt-1">Supports 12-Band GeoTIFF (<code class="text-cyan-400">.tif</code>) or optical imagery (<code class="text-cyan-400">.png / .jpg</code>)</p>
-                            </div>
-                            <div class="flex items-center justify-center gap-3">
-                                <button type="button" onclick="document.getElementById('file-input').click()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-600 transition-colors">
-                                    Browse Local File
-                                </button>
-                                <span id="file-info-badge" class="hidden text-xs font-mono px-3 py-1.5 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-800"></span>
-                            </div>
+                            
                         </div>
                     </div>
 
-                    <!-- Selected File Status Display -->
-                    <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                        <div class="flex items-center gap-2 text-slate-400">
-                            <i class="fa-solid fa-file-lines text-cyan-400"></i>
-                            <span>Selected:</span>
-                            <span id="selected-file-name" class="text-slate-200 font-mono font-medium">None (Select file or preset)</span>
+                    <!-- Threshold Slider -->
+                    <div class="control-group">
+                        <div class="control-label-row">
+                            <label for="threshold-slider" class="control-label">Decision Threshold (&tau;)</label>
+                            <span id="threshold-val" class="sample-badge font-mono" style="font-weight: 700; color: var(--accent-primary);">0.50</span>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Parameters & Actions (1 Col) -->
-                <div class="glass-panel rounded-2xl p-6 space-y-6 flex flex-col justify-between">
-                    <div class="space-y-5">
-                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                            <i class="fa-solid fa-sliders text-cyan-400"></i> Inference Controls
-                        </h3>
-
-                        <!-- Threshold Slider -->
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between text-xs">
-                                <label for="threshold-slider" class="text-slate-300 font-medium">Sigmoid Threshold (p &ge; &tau;)</label>
-                                <span id="threshold-val" class="font-mono text-cyan-400 font-bold bg-slate-800 px-2 py-0.5 rounded border border-slate-700">0.50</span>
-                            </div>
-                            <input type="range" id="threshold-slider" min="0.05" max="0.95" step="0.05" value="0.50" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
-                            <p class="text-[11px] text-slate-500">Default &tau; = 0.50. Lower values detect thin streams; higher values eliminate shoreline noise.</p>
-                        </div>
-
-                        <!-- Response Format Selector -->
-                        <div class="space-y-2">
-                            <label for="format-select" class="text-xs text-slate-300 font-medium">REST API Response Format</label>
-                            <select id="format-select" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
-                                <option value="json" selected>format=json (Interactive Visualizer + Metrics)</option>
-                                <option value="image">format=image (Direct Binary PNG Mask Stream)</option>
-                            </select>
-                            <p class="text-[11px] text-slate-500">format=image downloads the raw binary PNG mask stream with custom headers.</p>
+                        <input type="range" id="threshold-slider" min="0.05" max="0.95" step="0.05" value="0.50" class="range-slider" aria-label="Sigmoid decision threshold">
+                        <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">
+                            Standard &tau; = 0.50. Lower values capture shallow wetlands; higher values suppress shoreline reflections.
                         </div>
                     </div>
 
-                    <!-- Submit CTA Button -->
-                    <button id="submit-btn" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-dark-900 font-bold text-sm tracking-wide shadow-lg shadow-cyan-500/25 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i id="submit-spinner" class="fa-solid fa-circle-notch fa-spin hidden"></i>
-                        <span id="submit-label">Segment Water</span>
+                    <!-- Format Selector -->
+                    <div class="control-group">
+                        <div class="control-label-row">
+                            <label for="format-select" class="control-label">API Response Mode</label>
+                        </div>
+                        <select id="format-select" style="width: 100%; padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-default); background: var(--surface-subtle); color: var(--text-primary); font-size: 12px;">
+                            <option value="json" selected>format=json (Telemetry + Multi-view Assets)</option>
+                            <option value="image">format=image (Direct Binary PNG Mask Stream)</option>
+                        </select>
+                    </div>
+
+                    <!-- Primary Execution CTA -->
+                    <button id="submit-btn" class="btn-primary" type="button">
+                        <span id="submit-spinner" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                        </span>
+                        <span id="submit-label">Run Analysis</span>
                     </button>
                 </div>
-            </div>
 
-            <!-- Results Section (Revealed Dynamically) -->
-            <div id="results-section" class="hidden space-y-6 pt-4 border-t border-slate-800">
-                <!-- Section Header -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></div>
-                        <h2 class="text-lg font-bold text-white">Multispectral Inference Output</h2>
+                <!-- Right Column: Results & Visualizer -->
+                <div class="panel results-card">
+                    
+                    <!-- Empty State (Shown before any run) -->
+                    <div id="results-empty-state" class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/></svg>
+                        </div>
+                        <div class="empty-state-title">No raster loaded</div>
+                        <div class="empty-state-desc">Select one of the prepackaged validation scenes on the left or drop a 12-channel Sentinel-2 GeoTIFF to inspect surface water segmentation.</div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button id="btn-download-mask" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors">
-                            <i class="fa-solid fa-download text-cyan-400"></i> PNG Mask
-                        </button>
-                        <button id="btn-download-overlay" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors">
-                            <i class="fa-solid fa-download text-cyan-400"></i> Overlay
-                        </button>
-                        <button id="btn-export-json" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors">
-                            <i class="fa-solid fa-file-code text-cyan-400"></i> JSON
-                        </button>
+
+                    <!-- Results Section (Revealed dynamically) -->
+                    <div id="results-section" style="display: none;">
+                        
+                        <!-- Header with Export Actions -->
+                        <div class="panel-header" style="margin-bottom: 12px;">
+                            <div class="panel-title" style="color: var(--text-primary);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--water-data)" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                                <span>Inference Output</span>
+                            </div>
+                            <div class="btn-group">
+                                <button id="btn-download-mask" class="btn-secondary" type="button" title="Download binary water mask as PNG">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Mask (PNG)</span>
+                                </button>
+                                <button id="btn-download-overlay" class="btn-secondary" type="button" title="Download contour overlay as PNG">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Overlay</span>
+                                </button>
+                                <button id="btn-export-json" class="btn-secondary" type="button" title="Export metrics as JSON">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                    <span>JSON</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Honest Out-of-Distribution Badge (Dynamic) -->
+                        <div id="ood-alert-banner" class="alert-banner warning" style="display: none; margin-bottom: 12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            <div>
+                                <strong>Notice: Optical 3-Band RGB Fallback</strong>
+                                <div style="font-size: 11px; margin-top: 2px;">This scene contains 3 optical bands. Sentinel-2 multispectral bands (B1, B5&ndash;B8A, B11&ndash;B12) are synthesized. Results are indicative. For verified quantitative accuracy, use 12-channel GeoTIFF.</div>
+                            </div>
+                        </div>
+
+                        <!-- Telemetry Stat Strip -->
+                        <div class="stat-strip" style="margin-bottom: 14px;">
+                            <div class="stat-tile">
+                                <div class="stat-label">Surface Water</div>
+                                <div id="res-water-pct" class="stat-value water font-mono">--%</div>
+                                <div class="stat-unit">fraction of total</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-label">Water Pixels</div>
+                                <div id="res-water-pixels" class="stat-value font-mono">--</div>
+                                <div id="res-total-pixels" class="stat-unit">of 16,384 px</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-label">Mean Confidence</div>
+                                <div id="res-confidence" class="stat-value font-mono">--%</div>
+                                <div class="stat-unit">sigmoid probability</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-label">Inference Time</div>
+                                <div id="res-latency" class="stat-value font-mono">-- ms</div>
+                                <div class="stat-unit">ONNX Runtime CPU</div>
+                            </div>
+                        </div>
+
+                        <!-- Visualizer Mode Selector & Comparison Slider -->
+                        <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">
+                                Before / After Split Comparison
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-tertiary);">
+                                Drag slider horizontally to compare
+                            </div>
+                        </div>
+
+                        <!-- Comparison Slider Container -->
+                        <div id="comparison-container" class="visualizer-container">
+                            <img id="slider-img-after" src="" alt="Segmented Water Overlay" class="visualizer-img">
+                            <div id="comparison-before-div" class="slider-overlay-layer">
+                                <img id="slider-img-before" src="" alt="True-Color Optical Composite">
+                            </div>
+                            <div id="comparison-handle" class="slider-handle" aria-label="Drag slider handle">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                        </div>
+
+                        <!-- Tri-view Visual Assets Thumbnails -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">1. Optical (B4-B3-B2)</div>
+                                <div style="aspect-ratio: 1; background: var(--surface-subtle); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-subtle);">
+                                    <img id="preview-rgb" src="" alt="True Color Optical" style="width: 100%; height: 100%; object-fit: contain;">
+                                </div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">2. Binary Mask (M &isin; {0,1})</div>
+                                <div style="aspect-ratio: 1; background: #000; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-subtle);">
+                                    <img id="preview-mask" src="" alt="Binary Water Mask" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;">
+                                </div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">3. Shoreline Overlay</div>
+                                <div style="aspect-ratio: 1; background: var(--surface-subtle); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-subtle);">
+                                    <img id="preview-overlay" src="" alt="Contour Overlay" style="width: 100%; height: 100%; object-fit: contain;">
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Telemetry Cards Row -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="glass-panel rounded-xl p-5 border-l-4 border-l-cyan-400">
-                        <div class="text-xs text-slate-400 font-mono uppercase">Water Coverage</div>
-                        <div id="res-water-pct" class="text-3xl font-extrabold text-cyan-400 font-mono mt-1">--%</div>
-                        <div class="text-[11px] text-slate-500 mt-1">Surface Fraction</div>
-                    </div>
-                    <div class="glass-panel rounded-xl p-5 border-l-4 border-l-blue-400">
-                        <div class="text-xs text-slate-400 font-mono uppercase">Water Pixels</div>
-                        <div id="res-water-pixels" class="text-2xl font-bold text-white font-mono mt-1">-- px</div>
-                        <div id="res-total-pixels" class="text-[11px] text-slate-500 mt-1">of 16,384 px</div>
-                    </div>
-                    <div class="glass-panel rounded-xl p-5 border-l-4 border-l-emerald-400">
-                        <div class="text-xs text-slate-400 font-mono uppercase">Confidence</div>
-                        <div id="res-confidence" class="text-2xl font-bold text-emerald-400 font-mono mt-1">--%</div>
-                        <div class="text-[11px] text-slate-500 mt-1">Mean Probability</div>
-                    </div>
-                    <div class="glass-panel rounded-xl p-5 border-l-4 border-l-purple-400">
-                        <div class="text-xs text-slate-400 font-mono uppercase">Latency</div>
-                        <div id="res-latency" class="text-2xl font-bold text-purple-400 font-mono mt-1">-- ms</div>
-                        <div class="text-[11px] text-slate-500 mt-1">End-to-End Inference</div>
-                    </div>
-                </div>
-
-                <!-- Visual Comparison Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Column 1: True-Color Satellite Preview -->
-                    <div class="glass-panel rounded-2xl p-5 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-slate-300 font-semibold uppercase">1. True-Color Optical (B4-B3-B2)</span>
-                        </div>
-                        <div class="aspect-square bg-slate-900 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
-                            <img id="preview-rgb" src="" alt="True Color Composite" class="w-full h-full object-contain">
-                        </div>
-                        <p class="text-[11px] text-slate-500">Surface reflectance composite stretched for human inspection.</p>
-                    </div>
-
-                    <!-- Column 2: Pure Binary Water Mask -->
-                    <div class="glass-panel rounded-2xl p-5 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-cyan-400 font-semibold uppercase">2. Predicted Binary Mask (M &isin; {0,1})</span>
-                        </div>
-                        <div class="aspect-square bg-slate-900 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
-                            <img id="preview-mask" src="" alt="Binary Water Mask" class="w-full h-full object-contain image-rendering-pixelated">
-                        </div>
-                        <p class="text-[11px] text-slate-500">White (255) indicates classified open water surface.</p>
-                    </div>
-
-                    <!-- Column 3: High-Contrast Overlay Blend -->
-                    <div class="glass-panel rounded-2xl p-5 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-emerald-400 font-semibold uppercase">3. Alpha Contour Overlay</span>
-                        </div>
-                        <div class="aspect-square bg-slate-900 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
-                            <img id="preview-overlay" src="" alt="Water Contour Overlay" class="w-full h-full object-contain">
-                        </div>
-                        <p class="text-[11px] text-slate-500">Neon cyan water overlay with morphological shoreline borders.</p>
-                    </div>
-                </div>
-
-                <!-- Interactive Comparison Slider -->
-                <div class="glass-panel rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-arrows-left-right text-cyan-400"></i>
-                            <h3 class="text-sm font-bold text-white">Interactive Before / After Comparison Slider</h3>
-                        </div>
-                        <span class="text-xs text-slate-400">Drag handle across image</span>
-                    </div>
-
-                    <div id="comparison-container" class="comparison-slider-container w-full max-w-xl mx-auto aspect-square rounded-xl border border-slate-700 bg-slate-900">
-                        <img id="slider-img-after" src="" alt="Overlay" class="w-full h-full object-contain pointer-events-none">
-                        <div id="comparison-before-div" class="comparison-before">
-                            <img id="slider-img-before" src="" alt="Original Satellite" class="max-w-none w-full h-full object-contain pointer-events-none" style="width: 576px;">
-                        </div>
-                        <div id="comparison-handle" class="comparison-handle">
-                            <i class="fa-solid fa-arrows-left-right text-xs"></i>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
 
         <!-- ========================================== -->
-        <!-- TAB 2: INTERACTIVE EARTH SATELLITE EXPLORER -->
+        <!-- TAB 2: EARTH SATELLITE EXPLORER            -->
         <!-- ========================================== -->
-        <section id="tab-map" class="tab-pane hidden space-y-6">
-            <!-- Header Card -->
-            <div class="glass-panel rounded-2xl p-6">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="space-y-1">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/80 text-cyan-400 text-xs font-semibold">
-                            <i class="fa-solid fa-globe"></i> Advanced Star-Track Feature
+        <section id="tab-map" class="tab-pane" style="display: none; height: calc(100vh - 88px); position: relative;">
+            
+            <!-- Full-Bleed Map View -->
+            <div id="leaflet-map" style="width: 100%; height: 100%;"></div>
+
+            <!-- Floating Control Dock -->
+            <div class="map-floating-panel">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--water-data)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span>Satellite Explorer</span>
+                    </div>
+                    <span class="sample-badge font-mono" id="map-target-status">Beacon Ready</span>
+                </div>
+
+                <!-- Geocoding Search & Presets -->
+                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                    <input type="text" id="map-search-input" placeholder="Search reservoir or GPS..." style="flex: 1; padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-default); background: var(--surface-subtle); color: var(--text-primary); font-size: 12px;">
+                    <button id="btn-search-location" class="btn-secondary" type="button" style="padding: 0 10px;">
+                        Search
+                    </button>
+                </div>
+
+                <select id="map-quick-jump" style="width: 100%; padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-default); background: var(--surface-subtle); color: var(--text-primary); font-size: 12px; margin-bottom: 10px;">
+                    <option value="" disabled selected>Preset Reservoirs...</option>
+                    <option value="nasser">Lake Nasser (Egypt)</option>
+                    <option value="aswan">Aswan High Dam (Egypt)</option>
+                    <option value="cairo_nile">Nile River (Cairo)</option>
+                    <option value="suez">Suez Canal / Bitter Lakes</option>
+                    <option value="lake_mead">Lake Mead (USA)</option>
+                    <option value="lake_como">Lake Como (Italy)</option>
+                </select>
+
+                <!-- Scope Footprint Selector -->
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Scope Footprint</div>
+                    <div class="segmented-control" role="tablist">
+                        <button type="button" data-area-mode="small" class="segment-btn active area-mode-btn">Small 1x</button>
+                        <button type="button" data-area-mode="medium" class="segment-btn area-mode-btn">Medium 2x</button>
+                        <button type="button" data-area-mode="large" class="segment-btn area-mode-btn">Large 3x</button>
+                        <button type="button" data-area-mode="viewport" class="segment-btn area-mode-btn">Screen</button>
+                    </div>
+                </div>
+
+                <!-- Primary Map Analysis Button (Manual Only) -->
+                <button id="btn-segment-selected" class="btn-primary" type="button" style="margin-top: 0; margin-bottom: 10px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    <span id="btn-segment-selected-label">Analyze Target Point</span>
+                </button>
+
+                <!-- Controls: Opacity & Target Hint -->
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-secondary); padding-top: 8px; border-top: 1px solid var(--border-subtle);">
+                    <span>Mask Opacity:</span>
+                    <input type="range" id="map-overlay-opacity" min="0.1" max="1.0" step="0.05" value="0.85" style="width: 100px;">
+                </div>
+
+                <!-- Honest Map OOD Notice -->
+                <div style="margin-top: 8px; font-size: 10px; color: var(--text-tertiary); line-height: 1.4;">
+                    Tiles provide 3-band RGB optical imagery. Multi-spectral bands are synthesized; treat as visual exploration.
+                </div>
+
+                <!-- Offline / Error Banner (Revealed on error) -->
+                <div id="map-error-banner" class="alert-banner error" style="display: none; margin-top: 10px;">
+                    <div style="flex: 1;">
+                        <strong id="map-error-title">Inference Service Offline</strong>
+                        <div id="map-error-msg" style="font-size: 11px; margin-top: 2px;">Backend unavailable. Live satellite inference requires active server.</div>
+                        <button id="map-retry-btn" type="button" class="btn-secondary" style="margin-top: 6px; font-size: 11px; height: 26px;">
+                            Retry Connection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Map Telemetry Results (Revealed on success) -->
+                <div id="map-metrics-panel" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center;">
+                        <div class="stat-tile" style="padding: 6px 4px;">
+                            <div class="stat-label" style="font-size: 9px;">Water</div>
+                            <div id="geo-water-pct" class="stat-value water font-mono" style="font-size: 15px;">--%</div>
                         </div>
-                        <h2 class="text-2xl font-extrabold text-white">Interactive Earth Satellite Explorer</h2>
-                        <p class="text-xs sm:text-sm text-slate-400">
-                            Navigate anywhere on Earth or choose a preset water reservoir. Click on the satellite map to query live imagery, run the segmentation model, and overlay predicted water boundaries directly on the globe.
-                        </p>
+                        <div class="stat-tile" style="padding: 6px 4px;">
+                            <div class="stat-label" style="font-size: 9px;">Pixels</div>
+                            <div id="geo-water-px" class="stat-value font-mono" style="font-size: 15px;">--</div>
+                        </div>
+                        <div class="stat-tile" style="padding: 6px 4px;">
+                            <div class="stat-label" style="font-size: 9px;">Latency</div>
+                            <div id="geo-latency" class="stat-value font-mono" style="font-size: 15px;">-- ms</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Map Wrapper Container -->
-            <div class="glass-panel rounded-2xl p-4 space-y-4">
-                <!-- Map Controls Bar (Top Tier: Search & Jumps & Actions) -->
-                <div class="space-y-3 bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 text-xs">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <!-- Search & Quick Jumps -->
-                        <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-                            <!-- Geocoding Search -->
-                            <div class="relative flex-1 min-w-[200px]">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                                <input type="text" id="map-search-input" placeholder="Search city, lake, sea, or GPS (e.g. Hormuz, Nasser, Nile)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs font-sans">
-                            </div>
-                            <button id="btn-search-location" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold transition-colors flex items-center gap-1.5">
-                                Search
-                            </button>
+            <!-- Floating Coordinates Pill -->
+            <div class="map-coords-bar" id="map-gps-display">
+                Lat: 22.4500&deg; | Lon: 31.8500&deg; | Zoom: 12
+            </div>
 
-                            <!-- Quick Jumps -->
-                            <select id="map-quick-jump" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 font-sans">
-                                <option value="" disabled selected>Preset Reservoirs...</option>
-                                <option value="nasser">Lake Nasser (Egypt)</option>
-                                <option value="aswan">Aswan High Dam (Egypt)</option>
-                                <option value="cairo_nile">Nile River (Cairo)</option>
-                                <option value="suez">Suez Canal / Bitter Lakes</option>
-                                <option value="lake_mead">Lake Mead (USA)</option>
-                                <option value="lake_como">Lake Como (Italy)</option>
-                            </select>
-                        </div>
-
-                        <!-- Scope Footprint Selector (4 Options) -->
-                        <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-700">
-                            <span class="text-[10px] uppercase font-mono text-slate-400 px-1 hidden 2xl:inline">Scope:</span>
-                            <button type="button" data-area-mode="small" class="area-mode-btn active px-2.5 py-1 rounded text-xs font-bold transition-all bg-cyan-500 text-dark-900 shadow" title="Small Footprint (~20 km): 1x1 satellite tile">
-                                Small 1x
-                            </button>
-                            <button type="button" data-area-mode="medium" class="area-mode-btn px-2.5 py-1 rounded text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all" title="Medium Footprint (~50 km): 2x2 regional grid">
-                                Medium 2x
-                            </button>
-                            <button type="button" data-area-mode="large" class="area-mode-btn px-2.5 py-1 rounded text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all" title="Large Footprint (~100 km): 3x3 broad area">
-                                Large 3x
-                            </button>
-                            <button type="button" data-area-mode="viewport" class="area-mode-btn px-2.5 py-1 rounded text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1.5" title="Free / Full Viewport: Segment the entire visible screen currently shown on map">
-                                <i class="fa-solid fa-expand text-[10px] text-cyan-400"></i> Full Viewport
-                            </button>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex flex-wrap items-center gap-2">
-                            <!-- Primary Glowing Action Button -->
-                            <button id="btn-segment-selected" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-dark-900 font-extrabold flex items-center gap-2 shadow-lg shadow-cyan-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                                <i class="fa-solid fa-water text-sm"></i>
-                                <span id="btn-segment-selected-label">Analyze Target Point</span>
-                            </button>
-                            <!-- Secondary Center View Button -->
-                            <button id="btn-segment-center" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/80 font-semibold flex items-center gap-1.5 transition-colors">
-                                <i class="fa-solid fa-crosshairs"></i> Center View
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Tier: Status Hint & Opacity Slider -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-700/50 text-[11px] text-slate-400">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                            <span id="selected-target-hint" class="font-mono text-cyan-300 font-medium">Selected: Lake Nasser [22.4500°, 31.8500°]</span>
-                            <span class="hidden md:inline text-slate-500">&bull; Click anywhere on the map to move beacon</span>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                            <div class="flex items-center gap-2">
-                                <span class="text-slate-400">Mask Opacity:</span>
-                                <input type="range" id="map-overlay-opacity" min="0.1" max="1.0" step="0.05" value="0.85" class="w-16 h-1.5 bg-slate-900 rounded">
-                            </div>
-                            <span id="map-gps-display" class="font-mono text-cyan-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-700 text-[10px]">
-                                Lat: 22.45° | Lon: 31.85° | Zoom: 12
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Leaflet Map Container -->
-                <div class="relative w-full h-[400px] md:h-[580px] rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl">
-                    <div id="leaflet-map" class="w-full h-full z-10"></div>
-
-                    <!-- Loading Indicator Badge -->
-                    <div id="map-loading-indicator" class="hidden absolute top-4 right-4 z-20 bg-dark-900/90 border border-cyan-400 text-cyan-300 px-4 py-2 rounded-xl text-xs font-mono flex items-center gap-2 shadow-2xl backdrop-blur-md">
-                        <i class="fa-solid fa-satellite fa-spin text-cyan-400"></i>
-                        <span>Querying Satellite Tile & Segmenting...</span>
-                    </div>
-                </div>
-
-                <!-- Live Map Telemetry Bar -->
-                <div id="map-metrics-panel" class="hidden bg-slate-800/80 p-4 rounded-xl border border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div>
-                        <div class="text-[11px] text-slate-400 font-mono uppercase">Detected Water</div>
-                        <div id="geo-water-pct" class="text-xl font-bold text-cyan-400 font-mono mt-0.5">--%</div>
-                    </div>
-                    <div>
-                        <div class="text-[11px] text-slate-400 font-mono uppercase">Water Pixels</div>
-                        <div id="geo-water-px" class="text-xl font-bold text-white font-mono mt-0.5">-- px</div>
-                    </div>
-                    <div>
-                        <div class="text-[11px] text-slate-400 font-mono uppercase">Inference Latency</div>
-                        <div id="geo-latency" class="text-xl font-bold text-purple-400 font-mono mt-0.5">-- ms</div>
-                    </div>
-                    <div>
-                        <div class="text-[11px] text-slate-400 font-mono uppercase">Tile GPS Bounds</div>
-                        <div id="geo-bounds" class="text-xs font-mono text-slate-300 mt-1 truncate">--</div>
-                    </div>
-                </div>
+            <!-- Loading Badge -->
+            <div id="map-loading-indicator" style="display: none; position: absolute; top: 16px; right: 16px; z-index: 1000; background: var(--surface-panel); border: 1px solid var(--accent-primary); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 12px; font-family: monospace; color: var(--accent-primary); box-shadow: var(--shadow-floating); align-items: center; gap: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                <span>Fetching satellite tile &amp; segmenting...</span>
             </div>
         </section>
 
 
         <!-- ========================================== -->
-        <!-- TAB 3: REST API DOCUMENTATION & PLAYGROUND -->
+        <!-- TAB 3: REST API SPECIFICATION              -->
         <!-- ========================================== -->
-        <section id="tab-docs" class="tab-pane hidden space-y-6">
-            <div class="glass-panel rounded-2xl p-6 sm:p-8 space-y-6">
-                <div class="space-y-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/80 text-cyan-400 text-xs font-semibold">
-                        <i class="fa-solid fa-terminal"></i> Task 4 Production REST API Specification
+        <section id="tab-api" class="tab-pane docs-container" style="display: none;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        <span>REST API Specification</span>
                     </div>
-                    <h2 class="text-2xl font-extrabold text-white">REST API Documentation & Code Snippets</h2>
-                    <p class="text-slate-400 text-sm max-w-3xl leading-relaxed">
-                        HydroFlow provides a high-performance REST API strictly conforming to <code class="text-cyan-400 font-mono">task 4.pdf</code> requirements. It supports dual response modes: direct binary mask streaming (<code class="text-cyan-400 font-mono">format=image</code>) or structured telemetry and base64 visuals (<code class="text-cyan-400 font-mono">format=json</code>).
-                    </p>
+                    <span class="sample-badge">Dual Response Modes</span>
                 </div>
 
-                <!-- Endpoints Specification Table -->
-                <div class="overflow-x-auto rounded-xl border border-slate-700/80">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-800 text-slate-300 uppercase font-mono text-[11px]">
-                            <tr>
-                                <th class="p-3">Method</th>
-                                <th class="p-3">Endpoint</th>
-                                <th class="p-3">Parameters</th>
-                                <th class="p-3">Output Type</th>
-                                <th class="p-3">Description</th>
+                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                    HydroFlow provides a high-throughput REST API supporting multipart file uploads, direct sample identification, and dual output modes: binary PNG mask stream (<span class="font-mono">format=image</span>) and structured telemetry (<span class="font-mono">format=json</span>).
+                </p>
+
+                <!-- Endpoints Table -->
+                <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 20px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                        <thead>
+                            <tr style="background: var(--surface-subtle); border-bottom: 1px solid var(--border-subtle);">
+                                <th style="padding: 8px 12px; font-weight: 600;">Method</th>
+                                <th style="padding: 8px 12px; font-weight: 600;">Endpoint</th>
+                                <th style="padding: 8px 12px; font-weight: 600;">Format</th>
+                                <th style="padding: 8px 12px; font-weight: 600;">Description</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800 text-slate-300 font-mono">
-                            <tr class="hover:bg-slate-800/30">
-                                <td class="p-3 text-cyan-400 font-bold">POST</td>
-                                <td class="p-3 text-white">/predict?format=image</td>
-                                <td class="p-3 text-slate-400">file=@scene.tif</td>
-                                <td class="p-3 text-emerald-400">image/png</td>
-                                <td class="p-3 text-slate-400">Returns raw binary PNG mask stream with custom HTTP headers</td>
+                        <tbody style="font-family: monospace;">
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 8px 12px; color: var(--accent-primary); font-weight: 700;">POST</td>
+                                <td style="padding: 8px 12px;">/predict?format=image</td>
+                                <td style="padding: 8px 12px; color: var(--status-success);">image/png</td>
+                                <td style="padding: 8px 12px; font-family: sans-serif; color: var(--text-secondary);">Direct binary PNG mask stream with custom headers (X-Water-Percentage, X-Latency-Ms)</td>
                             </tr>
-                            <tr class="hover:bg-slate-800/30">
-                                <td class="p-3 text-cyan-400 font-bold">POST</td>
-                                <td class="p-3 text-white">/predict?format=json</td>
-                                <td class="p-3 text-slate-400">file=@scene.tif, threshold=0.5</td>
-                                <td class="p-3 text-blue-400">application/json</td>
-                                <td class="p-3 text-slate-400">Returns water %, pixels, latency, and base64 RGB/mask/overlay</td>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 8px 12px; color: var(--accent-primary); font-weight: 700;">POST</td>
+                                <td style="padding: 8px 12px;">/predict?format=json</td>
+                                <td style="padding: 8px 12px; color: var(--water-data);">application/json</td>
+                                <td style="padding: 8px 12px; font-family: sans-serif; color: var(--text-secondary);">JSON payload with water %, pixel counts, latency, and base64 assets</td>
                             </tr>
-                            <tr class="hover:bg-slate-800/30">
-                                <td class="p-3 text-cyan-400 font-bold">POST</td>
-                                <td class="p-3 text-white">/predict_geo</td>
-                                <td class="p-3 text-slate-400">{ lat, lon, zoom }</td>
-                                <td class="p-3 text-blue-400">application/json</td>
-                                <td class="p-3 text-slate-400">Satellite globe water segmentation with GPS bounds</td>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 8px 12px; color: var(--accent-primary); font-weight: 700;">POST</td>
+                                <td style="padding: 8px 12px;">/predict_geo</td>
+                                <td style="padding: 8px 12px; color: var(--water-data);">application/json</td>
+                                <td style="padding: 8px 12px; font-family: sans-serif; color: var(--text-secondary);">Satellite globe water segmentation with tile GPS coordinates</td>
                             </tr>
-                            <tr class="hover:bg-slate-800/30">
-                                <td class="p-3 text-emerald-400 font-bold">GET</td>
-                                <td class="p-3 text-white">/samples</td>
-                                <td class="p-3 text-slate-400">None</td>
-                                <td class="p-3 text-blue-400">application/json</td>
-                                <td class="p-3 text-slate-400">Lists the 3 prepackaged validation scenes with metadata</td>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 8px 12px; color: var(--status-success); font-weight: 700;">GET</td>
+                                <td style="padding: 8px 12px;">/samples</td>
+                                <td style="padding: 8px 12px; color: var(--water-data);">application/json</td>
+                                <td style="padding: 8px 12px; font-family: sans-serif; color: var(--text-secondary);">List verified validation scenes with metadata and ground-truth values</td>
                             </tr>
-                            <tr class="hover:bg-slate-800/30">
-                                <td class="p-3 text-emerald-400 font-bold">GET</td>
-                                <td class="p-3 text-white">/health</td>
-                                <td class="p-3 text-slate-400">None</td>
-                                <td class="p-3 text-blue-400">application/json</td>
-                                <td class="p-3 text-slate-400">Health check, device status, and model benchmark inventory</td>
+                            <tr>
+                                <td style="padding: 8px 12px; color: var(--status-success); font-weight: 700;">GET</td>
+                                <td style="padding: 8px 12px;">/health</td>
+                                <td style="padding: 8px 12px; color: var(--water-data);">application/json</td>
+                                <td style="padding: 8px 12px; font-family: sans-serif; color: var(--text-secondary);">System status, device provider, and model capability inventory</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Code Examples Tabs -->
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-code text-cyan-400"></i> Production Integration Snippets
-                    </h3>
-
-                    <!-- Snippet 1: cURL Image Stream -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between text-xs text-slate-400">
-                            <span class="font-mono text-cyan-400 font-bold">1. cURL — Download Binary Mask Stream (task 4.pdf requirement)</span>
-                        </div>
-                        <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code># Download water mask directly as water_mask.png
+                <!-- Integration Snippets -->
+                <div style="margin-top: 16px;">
+                    <div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 6px;">cURL &bull; Download Binary Mask Stream</div>
+                    <pre class="code-block"><code># Stream raw binary PNG mask directly to water_mask.png
 curl -X POST "http://127.0.0.1:5000/predict?format=image" \
      -F "file=@sample_1_lake.tif" \
      --output water_mask.png</code></pre>
-                    </div>
 
-                    <!-- Snippet 2: Python Requests JSON -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between text-xs text-slate-400">
-                            <span class="font-mono text-cyan-400 font-bold">2. Python — JSON Inference with Metrics & Base64 Assets</span>
-                        </div>
-                        <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>import requests
+                    <div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-top: 14px; margin-bottom: 6px;">Python &bull; Multipart JSON Inference</div>
+                    <pre class="code-block"><code>import requests
 
 url = "http://127.0.0.1:5000/predict?format=json"
-files = {"file": open("sample_1_lake.tif", "rb")}
-data = {"threshold": 0.50}
+with open("sample_1_lake.tif", "rb") as f:
+    res = requests.post(url, files={"file": f}, data={"threshold": 0.50})
 
-response = requests.post(url, files=files, data=data)
-result = response.json()
-
-print(f"Water Coverage: {result['water_percentage']}%")
-print(f"Water Pixels:   {result['water_pixels']} / {result['total_pixels']}")
-print(f"Inference Time: {result['latency_ms']} ms")</code></pre>
-                    </div>
-
-                    <!-- Snippet 3: Python Requests Direct Sample ID -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between text-xs text-slate-400">
-                            <span class="font-mono text-cyan-400 font-bold">3. Python — 1-Click Inference on Bundled Presets</span>
-                        </div>
-                        <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>import requests
-
-# Test prepackaged lake preset without uploading local files
-res = requests.post("http://127.0.0.1:5000/predict?format=json", json={"sample_id": "sample_1_lake"})
-print("Lake Sample Water %:", res.json()["water_percentage"])</code></pre>
-                    </div>
+data = res.json()
+print(f"Surface Water: {data['water_percentage']}%")
+print(f"Water Pixels:  {data['water_pixels']} / {data['total_pixels']}")
+print(f"Latency:       {data['latency_ms']} ms")</code></pre>
                 </div>
             </div>
         </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB 4: ARCHITECTURE & SPECIFICATIONS       -->
+        <!-- ========================================== -->
+        <section id="tab-specs" class="tab-pane docs-container" style="display: none;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Model Architecture &amp; Physical Calibration</span>
+                    </div>
+                    <span class="sample-badge">Benchmark 81.66% IoU</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                    <div class="stat-tile">
+                        <div class="stat-label">Model Architecture</div>
+                        <div class="stat-value" style="font-size: 16px;">ResNet-34 U-Net</div>
+                        <div class="stat-unit">Transfer Learning (ImageNet encoder)</div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-label">Input Layout</div>
+                        <div class="stat-value font-mono" style="font-size: 16px;">12 Channels &times; 128 &times; 128</div>
+                        <div class="stat-unit">Dynamic Spatial Resizing (mod 32)</div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-label">Inference Engine</div>
+                        <div class="stat-value" style="font-size: 16px;">ONNX Runtime (CPU)</div>
+                        <div class="stat-unit">Multi-threaded ORT_ENABLE_ALL</div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-label">Dataset Provenance</div>
+                        <div class="stat-value font-mono" style="font-size: 16px;">306 Sentinel-2 Scenes</div>
+                        <div class="stat-unit">Independent group-aware split</div>
+                    </div>
+                </div>
+
+                <div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 8px;">12-Channel Multispectral Raster Definition</div>
+                <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 12px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="background: var(--surface-subtle); border-bottom: 1px solid var(--border-subtle);">
+                                <th style="padding: 6px 10px;">Index</th>
+                                <th style="padding: 6px 10px;">Band / Layer</th>
+                                <th style="padding: 6px 10px;">Spectral Region</th>
+                                <th style="padding: 6px 10px;">Calibration Min</th>
+                                <th style="padding: 6px 10px;">Calibration Max</th>
+                                <th style="padding: 6px 10px;">Physical Function</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-family: monospace;">
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 0</td><td style="padding: 6px 10px;">B1</td><td style="padding: 6px 10px;">Coastal Aerosol</td><td style="padding: 6px 10px;">69.0</td><td style="padding: 6px 10px;">941.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Atmospheric scattering correction</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 1</td><td style="padding: 6px 10px;">B2</td><td style="padding: 6px 10px;">Blue</td><td style="padding: 6px 10px;">100.0</td><td style="padding: 6px 10px;">1143.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Water penetration &amp; bathymetry</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 2</td><td style="padding: 6px 10px;">B3</td><td style="padding: 6px 10px;">Green</td><td style="padding: 6px 10px;">233.0</td><td style="padding: 6px 10px;">1733.0</td><td style="padding: 6px 10px; font-family: sans-serif;">NDWI water reflection peak (560 nm)</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 3</td><td style="padding: 6px 10px;">B4</td><td style="padding: 6px 10px;">Red</td><td style="padding: 6px 10px;">104.0</td><td style="padding: 6px 10px;">2478.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Chlorophyll absorption baseline</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 4</td><td style="padding: 6px 10px;">B5</td><td style="padding: 6px 10px;">RedEdge 1</td><td style="padding: 6px 10px;">127.0</td><td style="padding: 6px 10px;">4046.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Vegetation transition boundary</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 5</td><td style="padding: 6px 10px;">B6</td><td style="padding: 6px 10px;">RedEdge 2</td><td style="padding: 6px 10px;">14.0</td><td style="padding: 6px 10px;">4453.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Canopy reflectance plateau</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 6</td><td style="padding: 6px 10px;">B7</td><td style="padding: 6px 10px;">RedEdge 3</td><td style="padding: 6px 10px;">11.0</td><td style="padding: 6px 10px;">3761.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Near-infrared transition slope</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 7</td><td style="padding: 6px 10px;">QA_PIXEL</td><td style="padding: 6px 10px;">Bitmask</td><td style="padding: 6px 10px;">64.0</td><td style="padding: 6px 10px;">224.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Quality assurance &amp; cloud/shadow flags</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 8</td><td style="padding: 6px 10px;">B8A</td><td style="padding: 6px 10px;">Narrow NIR</td><td style="padding: 6px 10px;">17.0</td><td style="padding: 6px 10px;">1902.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Atmospheric water vapor rejection</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 9</td><td style="padding: 6px 10px;">B11</td><td style="padding: 6px 10px;">SWIR 1</td><td style="padding: 6px 10px;">17.0</td><td style="padding: 6px 10px;">1907.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Strong water absorption (1610 nm)</td></tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 6px 10px;">Ch 10</td><td style="padding: 6px 10px;">WorldCover</td><td style="padding: 6px 10px;">ESA LULC</td><td style="padding: 6px 10px;">10.0</td><td style="padding: 6px 10px;">80.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Land-cover prior (80 = permanent water)</td></tr>
+                            <tr><td style="padding: 6px 10px;">Ch 11</td><td style="padding: 6px 10px;">JRC Water</td><td style="padding: 6px 10px;">Occurrence %</td><td style="padding: 6px 10px;">0.0</td><td style="padding: 6px 10px;">98.0</td><td style="padding: 6px 10px; font-family: sans-serif;">Multi-decadal historical occurrence frequency</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-dark-900/80 py-6 text-center text-xs text-slate-500 font-mono">
-        <div class="w-full max-w-[96%] 2xl:max-w-[1850px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div>
-                HydroFlow Platform &copy; 2026 | ResNet-34 12-Channel Pretrained U-Net | IoU 81.66%
-            </div>
-            <div class="flex items-center gap-4 text-slate-400">
-                <a href="/health" target="_blank" class="hover:text-cyan-400 transition-colors">/health</a>
-                <a href="/samples" target="_blank" class="hover:text-cyan-400 transition-colors">/samples</a>
-                <a href="/docs" target="_blank" class="hover:text-cyan-400 transition-colors">/docs</a>
-            </div>
+    <!-- Thin App Footer -->
+    <footer class="app-footer">
+        <div>
+            HydroFlow Platform &copy; 2026 &bull; ResNet-34 12-Channel Pretrained U-Net &bull; Global IoU 81.66%
+        </div>
+        <div class="footer-links">
+            <a href="/health" target="_blank" class="footer-link">/health</a>
+            <a href="/samples" target="_blank" class="footer-link">/samples</a>
+            <a href="/docs" target="_blank" class="footer-link">/docs</a>
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Client Scripts -->
+    <script src="/static/js/config.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="/static/js/main.js"></script>
     <script src="/static/js/map_explorer.js"></script>
 </body>

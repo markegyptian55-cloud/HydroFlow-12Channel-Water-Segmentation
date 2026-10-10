@@ -361,6 +361,46 @@ class TestHydroFlowAPI(unittest.TestCase):
         self.assertEqual(len(errors), 0, f"Thread-safety errors encountered: {errors}")
         self.assertLessEqual(len(cache), 16)
 
+    def test_21_standardized_error_format_missing_input(self):
+        """Test that missing input returns 400 with standardized {error: {code, message}} envelope."""
+        resp = self.client.post("/predict?format=json")
+        self.assertEqual(resp.status_code, 400)
+        data = resp.get_json()
+        self.assertIn("error", data)
+        self.assertIsInstance(data["error"], dict)
+        self.assertEqual(data["error"]["code"], "MISSING_INPUT")
+        self.assertIn("message", data["error"])
+
+    def test_22_sample_not_found_standardized_error(self):
+        """Test that non-existent sample returns 404 with standardized {error: {code, message}} envelope."""
+        resp = self.client.post("/predict?sample_id=nonexistent_scene_xyz&format=json")
+        self.assertEqual(resp.status_code, 404)
+        data = resp.get_json()
+        self.assertIn("error", data)
+        self.assertIsInstance(data["error"], dict)
+        self.assertEqual(data["error"]["code"], "SAMPLE_NOT_FOUND")
+        self.assertIn("message", data["error"])
+
+    def test_23_ood_rgb_warning_detection(self):
+        """Test that optical RGB input triggers is_multispectral=False and ood_warning."""
+        rgb_img = Image.new("RGB", (64, 64), color=(30, 80, 150))
+        buf = io.BytesIO()
+        rgb_img.save(buf, format="PNG")
+        buf.seek(0)
+
+        resp = self.client.post(
+            "/predict?format=json",
+            data={"file": (buf, "optical_scene.png")},
+            content_type="multipart/form-data"
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data["success"])
+        self.assertFalse(data["is_multispectral"])
+        self.assertEqual(data["input_channels"], 3)
+        self.assertIsNotNone(data["ood_warning"])
+        self.assertIn("Optical 3-band RGB fallback", data["ood_warning"])
+
 
 if __name__ == "__main__":
     unittest.main()
