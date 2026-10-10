@@ -11,6 +11,7 @@ satalite data/
 *.tiff
 *.npy
 *.npz
+!flask_platform/static/samples/*.tif
 
 # Model checkpoints, runs, and weights
 *.pth
@@ -18,6 +19,7 @@ satalite data/
 *.onnx
 *.ckpt
 runs/
+!flask_platform/weights/best_model.pth
 
 # Web App build & dependencies
 node_modules/

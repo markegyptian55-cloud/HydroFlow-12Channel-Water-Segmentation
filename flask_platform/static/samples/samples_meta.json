@@ -1,0 +1,52 @@
+{
+  "samples": [
+    {
+      "id": "sample_1_lake",
+      "filename": "sample_1_lake.tif",
+      "title": "Sample 1: Inland Lake / Reservoir",
+      "description": "High water coverage (76.90%) scene capturing an expansive open water reservoir with sharp littoral boundaries.",
+      "category": "Lake / Reservoir",
+      "source_id": 16,
+      "gt_water_percentage": 76.90,
+      "gt_water_pixels": 12600,
+      "pred_water_percentage": 78.31,
+      "expected_iou": 93.88,
+      "file_url": "/static/samples/sample_1_lake.tif",
+      "rgb_url": "/static/samples/sample_1_lake_rgb.png",
+      "gt_mask_url": "/static/samples/sample_1_lake_gt.png",
+      "overlay_url": "/static/samples/sample_1_lake_overlay.png"
+    },
+    {
+      "id": "sample_2_river",
+      "filename": "sample_2_river.tif",
+      "title": "Sample 2: Meandering River & Shoreline",
+      "description": "Moderate water coverage (35.28%) featuring river channel curvature, vegetative banks, and mixed shoreline transitions.",
+      "category": "River / Channel",
+      "source_id": 184,
+      "gt_water_percentage": 35.28,
+      "gt_water_pixels": 5780,
+      "pred_water_percentage": 34.35,
+      "expected_iou": 96.15,
+      "file_url": "/static/samples/sample_2_river.tif",
+      "rgb_url": "/static/samples/sample_2_river_rgb.png",
+      "gt_mask_url": "/static/samples/sample_2_river_gt.png",
+      "overlay_url": "/static/samples/sample_2_river_overlay.png"
+    },
+    {
+      "id": "sample_3_stream",
+      "filename": "sample_3_stream.tif",
+      "title": "Sample 3: Narrow Streams & Wetland",
+      "description": "Low water coverage (8.02%) challenging thin tributaries, marshland, and fine spatial details near the pixel resolution limit.",
+      "category": "Stream / Wetland",
+      "source_id": 181,
+      "gt_water_percentage": 8.02,
+      "gt_water_pixels": 1314,
+      "pred_water_percentage": 9.11,
+      "expected_iou": 87.38,
+      "file_url": "/static/samples/sample_3_stream.tif",
+      "rgb_url": "/static/samples/sample_3_stream_rgb.png",
+      "gt_mask_url": "/static/samples/sample_3_stream_gt.png",
+      "overlay_url": "/static/samples/sample_3_stream_overlay.png"
+    }
+  ]
+}

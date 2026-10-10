@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydroFlow API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
+    <!-- Navbar -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-slate-950 font-bold">
+                    <i class="fa-solid fa-water"></i>
+                </div>
+                <span class="font-extrabold text-lg text-white">HydroFlow <span class="text-cyan-400 font-mono text-sm">REST API</span></span>
+            </a>
+            <div class="flex items-center gap-4 text-xs font-mono">
+                <a href="/" class="text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <span class="px-2.5 py-1 rounded bg-slate-800 text-emerald-400 border border-slate-700">v2.4 Live</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-6 py-10 space-y-12">
+        <!-- Overview -->
+        <div class="space-y-4">
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">HydroFlow Water Intelligence API Specification</h1>
+            <p class="text-slate-400 text-sm max-w-3xl leading-relaxed">
+                HydroFlow exposes high-throughput endpoints for multispectral Sentinel-2 water segmentation. Designed to meet the requirements of <strong class="text-cyan-300">task 4.pdf</strong>, supporting dual outputs: raw binary mask stream (<code class="text-cyan-400">format=image</code>) and rich analytical payload (<code class="text-cyan-400">format=json</code>).
+            </p>
+        </div>
+
+        <!-- Endpoint 1: POST /predict -->
+        <div class="glass-panel rounded-2xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono text-xs font-bold uppercase">POST</span>
+                <h2 class="text-xl font-bold font-mono text-white">/predict</h2>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Executes deep learning inference on an uploaded multispectral GeoTIFF or preset sample scene. Returns either a binary PNG mask or full JSON telemetry.
+            </p>
+
+            <!-- Query Parameters Table -->
+            <div class="space-y-2">
+                <h3 class="text-xs font-bold uppercase font-mono text-slate-300">Query & Form Parameters</h3>
+                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                    <table class="w-full text-xs font-mono text-left">
+                        <thead class="bg-slate-900 text-slate-400">
+                            <tr>
+                                <th class="p-3">Parameter</th>
+                                <th class="p-3">Type</th>
+                                <th class="p-3">Required</th>
+                                <th class="p-3">Default</th>
+                                <th class="p-3">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/80 text-slate-300">
+                            <tr>
+                                <td class="p-3 text-cyan-400 font-bold">format</td>
+                                <td class="p-3 text-slate-400">string</td>
+                                <td class="p-3 text-slate-400">No</td>
+                                <td class="p-3 text-white">json</td>
+                                <td class="p-3 text-slate-400"><code class="text-cyan-300">image</code> returns PNG binary stream; <code class="text-cyan-300">json</code> returns metrics & base64</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 text-cyan-400 font-bold">threshold</td>
+                                <td class="p-3 text-slate-400">float</td>
+                                <td class="p-3 text-slate-400">No</td>
+                                <td class="p-3 text-white">0.50</td>
+                                <td class="p-3 text-slate-400">Sigmoid decision threshold in range [0.01, 0.99]</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 text-cyan-400 font-bold">file</td>
+                                <td class="p-3 text-slate-400">binary</td>
+                                <td class="p-3 text-amber-400">Conditional</td>
+                                <td class="p-3 text-slate-500">None</td>
+                                <td class="p-3 text-slate-400">Multipart file payload (.tif / .png / .jpg)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 text-cyan-400 font-bold">sample_id</td>
+                                <td class="p-3 text-slate-400">string</td>
+                                <td class="p-3 text-amber-400">Conditional</td>
+                                <td class="p-3 text-slate-500">None</td>
+                                <td class="p-3 text-slate-400">Direct identifier for bundled presets (<code class="text-cyan-300">sample_1_lake</code>, <code class="text-cyan-300">sample_2_river</code>, <code class="text-cyan-300">sample_3_stream</code>)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Code Snippets -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+                <div class="space-y-2">
+                    <span class="text-xs font-mono text-cyan-400 font-bold">cURL (Binary PNG Mask Download)</span>
+                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>curl -X POST "http://localhost:5000/predict?format=image" \
+  -F "file=@sample_1_lake.tif" \
+  -F "threshold=0.5" \
+  --output water_mask.png</code></pre>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="text-xs font-mono text-cyan-400 font-bold">Python requests (JSON Telemetry)</span>
+                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>import requests
+
+url = "http://localhost:5000/predict?format=json"
+files = {"file": open("sample_1_lake.tif", "rb")}
+resp = requests.post(url, files=files)
+print(resp.json())</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoint 2: POST /predict_geo -->
+        <div class="glass-panel rounded-2xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono text-xs font-bold uppercase">POST</span>
+                <h2 class="text-xl font-bold font-mono text-white">/predict_geo</h2>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Accepts GPS coordinates and zoom level, fetches live optical satellite imagery tile, executes water segmentation, and returns an alpha mask overlay with exact bounds for Leaflet ImageOverlay.
+            </p>
+
+            <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto"><code>curl -X POST "http://localhost:5000/predict_geo" \
+  -H "Content-Type: application/json" \
+  -d '{"lat": 23.97, "lon": 32.88, "zoom": 13, "threshold": 0.5}'</code></pre>
+        </div>
+
+        <!-- Endpoint 3 & 4: GET /samples and GET /health -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-panel rounded-2xl p-6 space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono text-xs font-bold uppercase">GET</span>
+                    <h3 class="text-base font-bold font-mono text-white">/samples</h3>
+                </div>
+                <p class="text-xs text-slate-400">
+                    Returns metadata, ground truth values, and asset paths for all 3 bundled validation scenes.
+                </p>
+                <pre class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono text-slate-300"><code>curl http://localhost:5000/samples</code></pre>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono text-xs font-bold uppercase">GET</span>
+                    <h3 class="text-base font-bold font-mono text-white">/health</h3>
+                </div>
+                <p class="text-xs text-slate-400">
+                    Returns service health, loaded PyTorch device, backbone parameters, and global benchmark IoU metrics.
+                </p>
+                <pre class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono text-slate-300"><code>curl http://localhost:5000/health</code></pre>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

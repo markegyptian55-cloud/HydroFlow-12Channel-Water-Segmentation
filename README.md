@@ -1,20 +1,25 @@
 # HydroFlow: Multispectral Satellite Water Segmentation & Generative Flow Matching
 
+[![Hugging Face Space](https://img.shields.io/badge/Hugging%20Face-Live%20Space-FFD21E.svg?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/spaces/egyx/hydroflow-water-segmentation)
+[![Direct Fullscreen App](https://img.shields.io/badge/Direct%20App-Fullscreen%20Web-00bcd4.svg?style=for-the-badge&logo=firefox&logoColor=white)](https://egyx-hydroflow-water-segmentation.static.hf.space)
 [![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-GitHub%20Pages-2ea44f.svg?style=for-the-badge&logo=github&logoColor=white)](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)
+[![Model Hub](https://img.shields.io/badge/Hugging%20Face-Model%20Hub-orange.svg?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/egyx/hydroflow-water-segmentation)
 [![Kaggle Collection](https://img.shields.io/badge/Kaggle-Research%20Collection%20(6%20Notebooks)-20BEFF.svg?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/work/collections/19309568)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Sentinel-2](https://img.shields.io/badge/Sentinel--2-MSI%2012--Band-005B94.svg?style=for-the-badge)](https://sentinels.copernicus.eu/)
 [![SMP](https://img.shields.io/badge/SMP-ResNet--34%20Pretrained-green.svg?style=for-the-badge)](https://github.com/qubvel-org/segmentation_models.pytorch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> 🚀 **Live Interactive Research Dashboard**:  
-> [**https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/**](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)  
-> *(Click any model to dynamically inspect training loss curves, toggle multi-model overlays, and test live NDWI spectral formulas directly in your browser with zero installation).*
->
-> 📓 **Official Kaggle Research Collection (All 6 Notebooks)**:  
-> [**https://www.kaggle.com/work/collections/19309568**](https://www.kaggle.com/work/collections/19309568)
->
+> 🚀 **Official Production Web Deployments & Research Assets**:
+> 
+> | Resource | Access Link | Description |
+> | :--- | :--- | :--- |
+> | 🌐 **Direct Fullscreen Web App** | [**Launch Platform**](https://egyx-hydroflow-water-segmentation.static.hf.space) | Standalone full-width app (no iframe wrappers), complete with Local Inference & Earth Explorer |
+> | 🤗 **Hugging Face Space** | [**Open Space**](https://huggingface.co/spaces/egyx/hydroflow-water-segmentation) | Hosted production Space on Hugging Face (`egyx/hydroflow-water-segmentation`) |
+> | 📊 **Interactive Research Dashboard** | [**View Dashboard**](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/) | GitHub Pages live benchmark curves, Pareto chart, and live NDWI formula simulator |
+> | 📦 **HF Model Hub Repository** | [**Download Weights**](https://huggingface.co/egyx/hydroflow-water-segmentation) | Pretrained PyTorch state dicts & ONNX graph checkpoints |
+> | 📓 **Kaggle Research Collection** | [**Explore 6 Notebooks**](https://www.kaggle.com/work/collections/19309568) | Full scientific reproducibility suite (EDA, Scratch, Ablation, Flow Matching, Transfer Learning) |
+> 
 > **Cellula Technologies — Comprehensive Research & Engineering Deliverable (Weeks 1 & 2)**  
 > **Author**: [Mohamed Mostafa Elbasyouni](https://github.com/markegyptian55-cloud) | `markegyptian55@gmail.com`
 
