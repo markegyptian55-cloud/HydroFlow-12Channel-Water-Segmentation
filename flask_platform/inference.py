@@ -346,7 +346,10 @@ class WaterInferenceEngine:
     @staticmethod
     def to_base64(pil_img: Image.Image, format: str = "PNG") -> str:
         buffered = io.BytesIO()
-        pil_img.save(buffered, format=format)
+        if format.upper() == "PNG":
+            pil_img.save(buffered, format="PNG", compress_level=1)
+        else:
+            pil_img.save(buffered, format=format)
         encoded = base64.b64encode(buffered.getvalue()).decode("utf-8")
         mime = "image/png" if format.upper() == "PNG" else "image/jpeg"
         return f"data:{mime};base64,{encoded}"
@@ -354,7 +357,10 @@ class WaterInferenceEngine:
     @staticmethod
     def to_bytes(pil_img: Image.Image, format: str = "PNG") -> bytes:
         buffered = io.BytesIO()
-        pil_img.save(buffered, format=format)
+        if format.upper() == "PNG":
+            pil_img.save(buffered, format="PNG", compress_level=1)
+        else:
+            pil_img.save(buffered, format=format)
         return buffered.getvalue()
 
     def predict(

@@ -14,5 +14,5 @@ jobs:
       - name: Send Keep-Alive HTTP Probe
         run: |
           echo "Sending keep-alive ping to HydroFlow Render backend..."
-          RESPONSE=$(curl -sSf -m 30 "https://hydroflow-backend-t7f9.onrender.com/health")
+          RESPONSE=$(curl -sSf -m 90 --retry 2 "https://hydroflow-backend-t7f9.onrender.com/health")
           echo "Backend Response: $RESPONSE"

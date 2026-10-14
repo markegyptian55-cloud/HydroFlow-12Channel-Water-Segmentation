@@ -20,6 +20,7 @@ satalite data/
 *.ckpt
 runs/
 !flask_platform/weights/best_model.pth
+!flask_platform/weights/best_model_quant.onnx
 
 # Web App build & dependencies
 node_modules/

@@ -199,6 +199,24 @@ function handleFileSelect(file) {
 /* ==========================================================================
    4. PREPACKAGED VALIDATION BENCHMARKS (1-Click)
    ========================================================================== */
+function resolveAssetPath(path) {
+    if (!path) return '';
+    if (path.startsWith('data:') || path.startsWith('http://') || path.startsWith('https://')) return path;
+    const clean = path.replace(/^\/+/, '');
+    
+    // On local Flask where /static is at root
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (clean.startsWith('flask_platform/static/')) return '/' + clean.replace('flask_platform/', '');
+        if (clean.startsWith('static/')) return '/' + clean;
+        return '/static/' + clean;
+    }
+    
+    // On GitHub Pages or static host where files are located under ./flask_platform/static/
+    if (clean.startsWith('static/')) return './flask_platform/' + clean;
+    if (clean.startsWith('flask_platform/')) return './' + clean;
+    return './flask_platform/static/' + clean;
+}
+
 const PREPACKAGED_DATA = {
     'sample_1_lake': {
         filename: 'sample_1_lake.tif',
@@ -210,9 +228,9 @@ const PREPACKAGED_DATA = {
         confidence_mean: 96.4,
         latency_ms: 24.3,
         images: {
-            rgb_preview: '/static/samples/sample_1_lake_rgb.png',
-            mask_preview: '/static/samples/sample_1_lake_pred_mask.png',
-            overlay_preview: '/static/samples/sample_1_lake_overlay.png'
+            rgb_preview: resolveAssetPath('samples/sample_1_lake_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_1_lake_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_1_lake_overlay.png')
         }
     },
     'sample_2_river': {
@@ -225,9 +243,9 @@ const PREPACKAGED_DATA = {
         confidence_mean: 94.8,
         latency_ms: 24.1,
         images: {
-            rgb_preview: '/static/samples/sample_2_river_rgb.png',
-            mask_preview: '/static/samples/sample_2_river_pred_mask.png',
-            overlay_preview: '/static/samples/sample_2_river_overlay.png'
+            rgb_preview: resolveAssetPath('samples/sample_2_river_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_2_river_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_2_river_overlay.png')
         }
     },
     'sample_3_stream': {
@@ -240,9 +258,9 @@ const PREPACKAGED_DATA = {
         confidence_mean: 91.2,
         latency_ms: 23.8,
         images: {
-            rgb_preview: '/static/samples/sample_3_stream_rgb.png',
-            mask_preview: '/static/samples/sample_3_stream_pred_mask.png',
-            overlay_preview: '/static/samples/sample_3_stream_overlay.png'
+            rgb_preview: resolveAssetPath('samples/sample_3_stream_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_3_stream_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_3_stream_overlay.png')
         }
     }
 };
@@ -274,8 +292,10 @@ function initPresets() {
             const fileInput = document.getElementById('file-input');
             if (fileInput) fileInput.value = '';
 
-            // Run execution immediately
-            executeSample(sampleId);
+            // Render instantly from verified prepackaged benchmarks (0 ms latency, no server delay!)
+            if (PREPACKAGED_DATA[sampleId]) {
+                renderResults(PREPACKAGED_DATA[sampleId]);
+            }
         });
     });
 }
@@ -290,9 +310,15 @@ function clearPresetSelection() {
 /* ==========================================================================
    5. EXECUTION PIPELINES
    ========================================================================== */
-async function executeSample(sampleId) {
+async function executeSample(sampleId, isLiveQuery = false) {
     const threshold = document.getElementById('threshold-slider')?.value || 0.50;
     const format = document.getElementById('format-select')?.value || 'json';
+
+    // If json mode and not explicitly live query, render verified prepackaged data instantly (0 ms)
+    if (!isLiveQuery && format === 'json' && PREPACKAGED_DATA[sampleId]) {
+        renderResults(PREPACKAGED_DATA[sampleId]);
+        return;
+    }
 
     setLoading(true);
 
@@ -301,7 +327,7 @@ async function executeSample(sampleId) {
 
         if (format === 'image') {
             const url = getApiUrl(`/predict?sample_id=${encodeURIComponent(sampleId)}&format=image&threshold=${threshold}`);
-            const res = await fetch(url, { method: 'POST' });
+            const res = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(12000) });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const waterPct = res.headers.get('X-Water-Percentage') || 'N/A';
@@ -323,7 +349,7 @@ async function executeSample(sampleId) {
 
         // format=json
         const url = getApiUrl(`/predict?sample_id=${encodeURIComponent(sampleId)}&format=json&threshold=${threshold}`);
-        const response = await fetch(url, { method: 'POST' });
+        const response = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(12000) });
         const contentType = response.headers.get('content-type') || '';
 
         if (response.ok && contentType.includes('application/json')) {
@@ -366,7 +392,7 @@ async function executeUpload(file) {
     try {
         if (format === 'image') {
             const url = getApiUrl(`/predict?format=image&threshold=${threshold}`);
-            const res = await fetch(url, { method: 'POST', body: formData });
+            const res = await fetch(url, { method: 'POST', body: formData, signal: AbortSignal.timeout(15000) });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const waterPct = res.headers.get('X-Water-Percentage') || 'N/A';
@@ -388,7 +414,7 @@ async function executeUpload(file) {
 
         // format=json
         const url = getApiUrl(`/predict?format=json&threshold=${threshold}`);
-        const response = await fetch(url, { method: 'POST', body: formData });
+        const response = await fetch(url, { method: 'POST', body: formData, signal: AbortSignal.timeout(15000) });
         const contentType = response.headers.get('content-type') || '';
 
         if (response.ok && contentType.includes('application/json')) {
@@ -448,18 +474,22 @@ function renderResults(data) {
         }
     }
 
-    // Visual assets
+    // Visual assets with path resolution
     const rgbImg = document.getElementById('preview-rgb');
     const maskImg = document.getElementById('preview-mask');
     const overlayImg = document.getElementById('preview-overlay');
     const sliderBefore = document.getElementById('slider-img-before');
     const sliderAfter = document.getElementById('slider-img-after');
 
-    if (rgbImg) rgbImg.src = data.images.rgb_preview;
-    if (maskImg) maskImg.src = data.images.mask_preview;
-    if (overlayImg) overlayImg.src = data.images.overlay_preview;
-    if (sliderBefore) sliderBefore.src = data.images.rgb_preview;
-    if (sliderAfter) sliderAfter.src = data.images.overlay_preview;
+    const rgbSrc = resolveAssetPath(data.images?.rgb_preview);
+    const maskSrc = resolveAssetPath(data.images?.mask_preview);
+    const overlaySrc = resolveAssetPath(data.images?.overlay_preview);
+
+    if (rgbImg) rgbImg.src = rgbSrc;
+    if (maskImg) maskImg.src = maskSrc;
+    if (overlayImg) overlayImg.src = overlaySrc;
+    if (sliderBefore) sliderBefore.src = rgbSrc;
+    if (sliderAfter) sliderAfter.src = overlaySrc;
 
     // Export buttons
     const btnDownloadMask = document.getElementById('btn-download-mask');

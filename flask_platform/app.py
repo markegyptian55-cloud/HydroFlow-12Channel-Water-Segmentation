@@ -9,21 +9,21 @@ from typing import Dict, Any, Tuple, Optional
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from flask import Flask, request, jsonify, send_file, render_template, Response
+from flask import Flask, request, jsonify, send_file, render_template, Response, send_from_directory
 from flask_cors import CORS
 from PIL import Image
 import numpy as np
 
 try:
     from .config import (
-        HOST, PORT, DEBUG, MAX_CONTENT_LENGTH,
+        HOST, PORT, DEBUG, MAX_CONTENT_LENGTH, BASE_DIR,
         SAMPLES_DIR, SAMPLES_META_PATH, BACKBONE,
         IN_CHANNELS, CLASSES, THRESHOLD, DEVICE
     )
     from .inference import WaterInferenceEngine
 except ImportError:
     from config import (
-        HOST, PORT, DEBUG, MAX_CONTENT_LENGTH,
+        HOST, PORT, DEBUG, MAX_CONTENT_LENGTH, BASE_DIR,
         SAMPLES_DIR, SAMPLES_META_PATH, BACKBONE,
         IN_CHANNELS, CLASSES, THRESHOLD, DEVICE
     )
@@ -155,6 +155,13 @@ def index():
 def docs():
     """Serves the interactive REST API documentation page."""
     return render_template("docs.html")
+
+
+@app.route("/weights/<path:filename>", methods=["GET"])
+def serve_weights(filename):
+    """Serves model weight files (e.g. quantized ONNX) for client-side browser inference."""
+    weights_dir = os.path.join(BASE_DIR, "weights")
+    return send_from_directory(weights_dir, filename)
 
 
 @app.route("/health", methods=["GET"])
@@ -483,9 +490,7 @@ def predict_geo():
         "confidence_mean": res["confidence_mean"],
         "latency_ms": res["latency_ms"],
         "cached": False,
-        "overlay_base64": engine.to_base64(transparent_mask_img, format="PNG"),
-        "rgb_base64": engine.to_base64(raw_tile_img, format="PNG"),
-        "mask_base64": engine.to_base64(mask_pil, format="PNG")
+        "overlay_base64": engine.to_base64(transparent_mask_img, format="PNG")
     }
     prediction_cache.put(pred_cache_key, payload)
 
