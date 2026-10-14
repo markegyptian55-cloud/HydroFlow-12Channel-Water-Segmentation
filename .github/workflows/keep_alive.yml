@@ -1,0 +1,18 @@
+name: HydroFlow Backend Keep-Alive Ping
+
+on:
+  schedule:
+    # Runs every 10 minutes to prevent Render Free Tier from entering sleep mode
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping-render:
+    name: Ping Cloud Backend Health Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Keep-Alive HTTP Probe
+        run: |
+          echo "Sending keep-alive ping to HydroFlow Render backend..."
+          RESPONSE=$(curl -sSf -m 30 "https://hydroflow-backend-t7f9.onrender.com/health")
+          echo "Backend Response: $RESPONSE"

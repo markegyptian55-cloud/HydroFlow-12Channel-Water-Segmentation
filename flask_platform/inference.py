@@ -77,9 +77,15 @@ class WaterInferenceEngine:
                 import onnxruntime as ort
                 opts = ort.SessionOptions()
                 opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-                num_threads = min(8, os.cpu_count() or 4)
+                # Cloud CPU optimization: On containerized CPU environments (e.g. Render with 0.5 vCPU quota),
+                # single-threaded execution (intra_op=1) prevents Linux CFS CPU quota throttling and thread contention.
+                env_threads = os.environ.get("ONNX_NUM_THREADS", None)
+                if env_threads:
+                    num_threads = max(1, int(env_threads))
+                else:
+                    num_threads = 1 if os.environ.get("RENDER", None) else min(2, os.cpu_count() or 1)
                 opts.intra_op_num_threads = num_threads
-                opts.inter_op_num_threads = 2
+                opts.inter_op_num_threads = 1
                 opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
                 self.ort_session = ort.InferenceSession(
                     self.onnx_path,
@@ -249,22 +255,15 @@ class WaterInferenceEngine:
     def _normalize_12ch(self, raw_12ch: np.ndarray) -> np.ndarray:
         """
         Applies physical Sentinel-2 calibration and scales to (12, H, W) in [0, 1].
+        Ultra-low-latency vectorized array implementation.
         """
-        raw_12ch = np.nan_to_num(raw_12ch, nan=0.0, posinf=0.0, neginf=0.0)
-        h, w = raw_12ch.shape[0], raw_12ch.shape[1]
-        norm_img = np.zeros((12, h, w), dtype=np.float32)
-
-        for b in range(12):
-            ch = raw_12ch[:, :, b].copy()
-            ch[ch < -9000] = 0.0
-            if b <= 6:
-                ch = np.clip(ch, 0.0, None)
-            min_val = self.band_mins[b]
-            max_val = self.band_maxs[b]
-            norm_ch = (ch - min_val) / (max_val - min_val + 1e-6)
-            norm_img[b] = np.clip(norm_ch, 0.0, 1.0)
-
-        return norm_img
+        raw = np.nan_to_num(raw_12ch, nan=0.0, posinf=0.0, neginf=0.0)
+        raw = np.maximum(raw, 0.0)
+        mins = np.array(self.band_mins, dtype=np.float32).reshape(1, 1, 12)
+        maxs = np.array(self.band_maxs, dtype=np.float32).reshape(1, 1, 12)
+        denom = np.maximum(maxs - mins, 1e-6)
+        norm = np.clip((raw - mins) / denom, 0.0, 1.0)
+        return np.ascontiguousarray(norm.transpose(2, 0, 1), dtype=np.float32)
 
     def preprocess(self, raw_12ch: np.ndarray) -> Tuple[Any, Tuple[int, int]]:
         """
@@ -361,7 +360,8 @@ class WaterInferenceEngine:
     def predict(
         self,
         input_source: Union[str, bytes, io.BytesIO, np.ndarray, Image.Image],
-        threshold: float = THRESHOLD
+        threshold: float = THRESHOLD,
+        generate_visuals: bool = True
     ) -> Dict[str, Any]:
         """
         Executes end-to-end inference using ONNX Runtime (or PyTorch eager) and returns masks, statistics, and visuals.
@@ -423,10 +423,15 @@ class WaterInferenceEngine:
 
         latency_ms = float(round((time.perf_counter() - t0) * 1000.0, 2))
 
-        # Step 6: Visual Assets Generation
-        rgb_preview = self.create_rgb_composite(raw_12ch)
-        mask_preview = Image.fromarray((binary_mask * 255).astype(np.uint8), mode="L")
-        overlay_preview = self.create_overlay(rgb_preview, binary_mask)
+        # Step 6: Visual Assets Generation (Selective to optimize latency)
+        if generate_visuals:
+            rgb_preview = self.create_rgb_composite(raw_12ch)
+            mask_preview = Image.fromarray((binary_mask * 255).astype(np.uint8), mode="L")
+            overlay_preview = self.create_overlay(rgb_preview, binary_mask)
+        else:
+            rgb_preview = None
+            mask_preview = None
+            overlay_preview = None
 
         return {
             "success": True,

@@ -252,19 +252,74 @@ async function handleSearchLocation(query) {
 }
 
 /* ==========================================================================
-   3. SATELLITE TILE INFERENCE EXECUTION (STRICTLY HONEST)
+   3. SATELLITE TILE INFERENCE EXECUTION (STRICTLY HONEST & MULTI-TIER CACHED)
    ========================================================================== */
+// Tier 1 In-Browser Prediction Cache for instant (0 ms) rendering
+const clientGeoCache = new Map();
+const MAX_CLIENT_CACHE = 128;
+
+function renderGeoResult(data, displayLatencyMs, isCached) {
+    const metricsPanel = document.getElementById('map-metrics-panel');
+
+    // Clean previous layers
+    if (currentGeoOverlay) hydroMap.removeLayer(currentGeoOverlay);
+    if (currentBbox) hydroMap.removeLayer(currentBbox);
+
+    // Bounding Box footprint outline
+    currentBbox = L.rectangle(data.bounds, {
+        color: 'var(--water-data)',
+        weight: 2,
+        dashArray: '4, 4',
+        fillColor: 'var(--water-data)',
+        fillOpacity: 0.05
+    }).addTo(hydroMap);
+
+    // Overlay transparent PNG mask
+    const opacity = parseFloat(document.getElementById('map-overlay-opacity')?.value || 0.85);
+    currentGeoOverlay = L.imageOverlay(data.overlay_base64, data.bounds, {
+        opacity: opacity,
+        interactive: false
+    }).addTo(hydroMap);
+
+    // Update telemetry panel
+    if (metricsPanel) {
+        metricsPanel.style.display = 'block';
+        const pctEl = document.getElementById('geo-water-pct');
+        const pxEl = document.getElementById('geo-water-px');
+        const latEl = document.getElementById('geo-latency');
+        if (pctEl) pctEl.textContent = `${data.water_percentage.toFixed(1)}%`;
+        if (pxEl) pxEl.textContent = data.water_pixels.toLocaleString();
+        if (latEl) {
+            latEl.textContent = isCached ? `${displayLatencyMs.toFixed(0)} ms (cached)` : `${displayLatencyMs.toFixed(0)} ms`;
+        }
+    }
+
+    const statusBadge = document.getElementById('map-target-status');
+    if (statusBadge) {
+        statusBadge.textContent = `${data.water_percentage.toFixed(1)}% Water`;
+    }
+}
+
 async function executeGeoInference(lat, lon, zoom) {
     const loadingBadge = document.getElementById('map-loading-indicator');
-    const metricsPanel = document.getElementById('map-metrics-panel');
     const errorBanner = document.getElementById('map-error-banner');
     const actionLabel = document.getElementById('btn-segment-selected-label');
+
+    const threshold = parseFloat(document.getElementById('threshold-slider')?.value || 0.50);
+
+    // 0. Check Tier 1 In-Browser Cache (0 ms instant response)
+    const clientKey = `${lat.toFixed(4)}_${lon.toFixed(4)}_${zoom}_${currentAreaMode}_${threshold.toFixed(2)}`;
+    if (clientGeoCache.has(clientKey)) {
+        const cachedData = clientGeoCache.get(clientKey);
+        renderGeoResult(cachedData, 0.0, true);
+        if (loadingBadge) loadingBadge.style.display = 'none';
+        if (actionLabel) actionLabel.textContent = 'Analyze Target Point';
+        return;
+    }
 
     if (loadingBadge) loadingBadge.style.display = 'flex';
     if (errorBanner) errorBanner.style.display = 'none';
     if (actionLabel) actionLabel.textContent = 'Segmenting...';
-
-    const threshold = parseFloat(document.getElementById('threshold-slider')?.value || 0.50);
 
     // Visible viewport bounds
     const boundsObj = hydroMap.getBounds();
@@ -276,6 +331,7 @@ async function executeGeoInference(lat, lon, zoom) {
     const getApiUrl = (endpoint) => window.HYDROFLOW_CONFIG?.apiUrl ? window.HYDROFLOW_CONFIG.apiUrl(endpoint) : endpoint;
 
     try {
+        const t0 = performance.now();
         const resp = await fetch(getApiUrl('/predict_geo'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -305,41 +361,15 @@ async function executeGeoInference(lat, lon, zoom) {
             throw new Error(errorMsg);
         }
 
-        // Clean previous layers
-        if (currentGeoOverlay) hydroMap.removeLayer(currentGeoOverlay);
-        if (currentBbox) hydroMap.removeLayer(currentBbox);
-
-        // Bounding Box footprint outline
-        currentBbox = L.rectangle(data.bounds, {
-            color: 'var(--water-data)',
-            weight: 2,
-            dashArray: '4, 4',
-            fillColor: 'var(--water-data)',
-            fillOpacity: 0.05
-        }).addTo(hydroMap);
-
-        // Overlay transparent PNG mask
-        const opacity = parseFloat(document.getElementById('map-overlay-opacity')?.value || 0.85);
-        currentGeoOverlay = L.imageOverlay(data.overlay_base64, data.bounds, {
-            opacity: opacity,
-            interactive: false
-        }).addTo(hydroMap);
-
-        // Update telemetry panel
-        if (metricsPanel) {
-            metricsPanel.style.display = 'block';
-            const pctEl = document.getElementById('geo-water-pct');
-            const pxEl = document.getElementById('geo-water-px');
-            const latEl = document.getElementById('geo-latency');
-            if (pctEl) pctEl.textContent = `${data.water_percentage.toFixed(1)}%`;
-            if (pxEl) pxEl.textContent = data.water_pixels.toLocaleString();
-            if (latEl) latEl.textContent = `${data.latency_ms.toFixed(0)} ms`;
+        // Store in Tier 1 Browser Cache
+        if (clientGeoCache.size >= MAX_CLIENT_CACHE) {
+            const oldestKey = clientGeoCache.keys().next().value;
+            clientGeoCache.delete(oldestKey);
         }
+        clientGeoCache.set(clientKey, data);
 
-        const statusBadge = document.getElementById('map-target-status');
-        if (statusBadge) {
-            statusBadge.textContent = `${data.water_percentage.toFixed(1)}% Water`;
-        }
+        // Render result on map
+        renderGeoResult(data, data.latency_ms, Boolean(data.cached));
 
     } catch (err) {
         console.warn('Map inference failed:', err);
