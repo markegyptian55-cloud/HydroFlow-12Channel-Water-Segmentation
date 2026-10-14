@@ -6,21 +6,33 @@ from typing import Union, Tuple, Dict, Any, Optional
 import numpy as np
 import tifffile as tiff
 from PIL import Image
-import torch
-import torch.nn as nn
+try:
+    import torch
+    import torch.nn as nn
+    TORCH_AVAILABLE = True
+except ImportError:
+    torch = None
+    nn = None
+    TORCH_AVAILABLE = False
 
 try:
     from .config import (
         BACKBONE, IN_CHANNELS, CLASSES, THRESHOLD, DEVICE,
         WEIGHTS_PATH, ONNX_WEIGHTS_PATH, BAND_MINS, BAND_MAXS, RGB_INDICES, BASE_DIR
     )
-    from .models.pretrained_smp import build_pretrained_unet
 except ImportError:
     from config import (
         BACKBONE, IN_CHANNELS, CLASSES, THRESHOLD, DEVICE,
         WEIGHTS_PATH, ONNX_WEIGHTS_PATH, BAND_MINS, BAND_MAXS, RGB_INDICES, BASE_DIR
     )
-    from models.pretrained_smp import build_pretrained_unet
+
+try:
+    from .models.pretrained_smp import build_pretrained_unet
+except (ImportError, ModuleNotFoundError):
+    try:
+        from models.pretrained_smp import build_pretrained_unet
+    except (ImportError, ModuleNotFoundError):
+        build_pretrained_unet = None
 
 
 class WaterInferenceEngine:
@@ -54,7 +66,10 @@ class WaterInferenceEngine:
         self.ort_session = None
         self.model = None
         self.backend = None
-        self.device = torch.device(device if device else DEVICE)
+        if TORCH_AVAILABLE and torch is not None:
+            self.device = torch.device(device if device else DEVICE)
+        else:
+            self.device = "cpu"
 
         # Attempt ONNX Runtime initialization
         if self.onnx_path and os.path.exists(self.onnx_path):
@@ -74,7 +89,7 @@ class WaterInferenceEngine:
                 self.input_name = self.ort_session.get_inputs()[0].name
                 self.output_name = self.ort_session.get_outputs()[0].name
                 self.backend = "onnx"
-                self.device = torch.device("cpu")
+                self.device = "cpu"
                 print(f"ONNX Runtime engine active ({num_threads} CPU threads, ORT_ENABLE_ALL)")
             except Exception as e:
                 print(f"Warning: ONNX Runtime init failed ({e}), falling back to PyTorch eager.")
@@ -82,6 +97,11 @@ class WaterInferenceEngine:
 
         # Fallback to PyTorch eager mode
         if self.ort_session is None:
+            if not TORCH_AVAILABLE or torch is None or build_pretrained_unet is None:
+                raise RuntimeError(
+                    "No inference engine available. ONNX Runtime model not found or failed, "
+                    "and PyTorch is not installed in this environment."
+                )
             self.backend = "pytorch"
             print(f"Initializing PyTorch eager engine on {self.device}...")
             self.model = build_pretrained_unet(
@@ -246,13 +266,16 @@ class WaterInferenceEngine:
 
         return norm_img
 
-    def preprocess(self, raw_12ch: np.ndarray) -> Tuple[torch.Tensor, Tuple[int, int]]:
+    def preprocess(self, raw_12ch: np.ndarray) -> Tuple[Any, Tuple[int, int]]:
         """
         Applies physical calibration and formats tensor (1, 12, H, W) for PyTorch eager compatibility.
         """
         norm_img = self._normalize_12ch(raw_12ch)
         h, w = raw_12ch.shape[0], raw_12ch.shape[1]
-        tensor = torch.from_numpy(norm_img).unsqueeze(0).to(self.device)
+        if TORCH_AVAILABLE and torch is not None:
+            tensor = torch.from_numpy(norm_img).unsqueeze(0).to(self.device)
+        else:
+            tensor = norm_img[np.newaxis, ...]
         return tensor, (h, w)
 
     def create_rgb_composite(self, raw_12ch: np.ndarray) -> Image.Image:
@@ -370,6 +393,10 @@ class WaterInferenceEngine:
                 logits = logits[:orig_h, :orig_w]
             probs = 1.0 / (1.0 + np.exp(-np.clip(logits, -88.0, 88.0)))
         else:
+            if not TORCH_AVAILABLE or torch is None or self.model is None:
+                raise RuntimeError(
+                    "No inference engine active. ONNX Runtime model failed to run and PyTorch is not available."
+                )
             tensor = torch.from_numpy(norm_input).unsqueeze(0).to(self.device)
             with torch.no_grad():
                 logits = self.model(tensor)
