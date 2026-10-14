@@ -19,8 +19,8 @@
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             resolvedBaseUrl = window.location.origin;
         } else {
-            // By default, same origin relative endpoints
-            resolvedBaseUrl = '';
+            // Production Cloud Inference Backend on Render
+            resolvedBaseUrl = 'https://hydroflow-backend-t7f9.onrender.com';
         }
     }
 

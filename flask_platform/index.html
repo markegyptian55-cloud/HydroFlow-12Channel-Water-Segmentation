@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     
     <!-- HydroFlow Token-Driven Design System (Zero Tailwind CDN) -->
-    <link rel="stylesheet" href="/static/css/style.css?v=3.1">
+    <link rel="stylesheet" href="./static/css/style.css?v=3.2">
 </head>
 <body>
 
@@ -51,6 +51,10 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                 <span>Specifications</span>
             </button>
+            <a href="dashboard.html" class="nav-tab" style="text-decoration: none;" title="Open Research Benchmarks & Loss Curves">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Benchmark</span>
+            </a>
         </nav>
 
         <!-- Header Actions -->
@@ -590,16 +594,16 @@ print(f"Latency:       {data['latency_ms']} ms")</code></pre>
             HydroFlow Platform &copy; 2026 &bull; ResNet-34 12-Channel Pretrained U-Net &bull; Global IoU 81.66%
         </div>
         <div class="footer-links">
-            <a href="/health" target="_blank" class="footer-link">/health</a>
-            <a href="/samples" target="_blank" class="footer-link">/samples</a>
-            <a href="/docs" target="_blank" class="footer-link">/docs</a>
+            <a href="https://hydroflow-backend-t7f9.onrender.com/health" target="_blank" class="footer-link">/health (Render API)</a>
+            <a href="https://hydroflow-backend-t7f9.onrender.com/samples" target="_blank" class="footer-link">/samples</a>
+            <a href="https://hydroflow-backend-t7f9.onrender.com/docs" target="_blank" class="footer-link">/docs</a>
         </div>
     </footer>
 
     <!-- Client Scripts -->
-    <script src="/static/js/config.js"></script>
+    <script src="./static/js/config.js?v=3.2"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="/static/js/main.js"></script>
-    <script src="/static/js/map_explorer.js"></script>
+    <script src="./static/js/main.js?v=3.2"></script>
+    <script src="./static/js/map_explorer.js?v=3.2"></script>
 </body>
 </html>

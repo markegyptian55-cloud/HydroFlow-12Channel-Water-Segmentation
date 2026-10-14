@@ -1,5 +1,10 @@
 import os
-import torch
+try:
+    import torch
+    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+except ImportError:
+    torch = None
+    DEVICE = "cpu"
 
 # Base directory paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,7 +18,6 @@ BACKBONE = "resnet34"
 IN_CHANNELS = 12
 CLASSES = 1
 THRESHOLD = 0.5
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Physical Sentinel-2 12-Band Calibration Bounds
 # Derived from full dataset 1st and 99th percentiles

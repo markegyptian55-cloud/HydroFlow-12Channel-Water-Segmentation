@@ -1,8 +1,7 @@
 # HydroFlow: Multispectral Satellite Water Segmentation & Generative Flow Matching
 
-[![Hugging Face Space](https://img.shields.io/badge/Hugging%20Face-Live%20Space-FFD21E.svg?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/spaces/egyx/hydroflow-water-segmentation)
-[![Direct Fullscreen App](https://img.shields.io/badge/Direct%20App-Fullscreen%20Web-00bcd4.svg?style=for-the-badge&logo=firefox&logoColor=white)](https://egyx-hydroflow-water-segmentation.static.hf.space)
-[![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-GitHub%20Pages-2ea44f.svg?style=for-the-badge&logo=github&logoColor=white)](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)
+[![Live Web Platform](https://img.shields.io/badge/Live%20Platform-GitHub%20Pages-2ea44f.svg?style=for-the-badge&logo=github&logoColor=white)](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/)
+[![Backend API](https://img.shields.io/badge/Cloud%20Backend-Render%20Web%20Service-46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)](https://hydroflow-backend-t7f9.onrender.com/health)
 [![Model Hub](https://img.shields.io/badge/Hugging%20Face-Model%20Hub-orange.svg?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/egyx/hydroflow-water-segmentation)
 [![Kaggle Collection](https://img.shields.io/badge/Kaggle-Research%20Collection%20(6%20Notebooks)-20BEFF.svg?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/work/collections/19309568)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
@@ -10,14 +9,14 @@
 [![SMP](https://img.shields.io/badge/SMP-ResNet--34%20Pretrained-green.svg?style=for-the-badge)](https://github.com/qubvel-org/segmentation_models.pytorch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> 🚀 **Official Production Web Deployments & Research Assets**:
+> 🚀 **Official Production Web Deployment & Research Assets**:
 > 
 > | Resource | Access Link | Description |
 > | :--- | :--- | :--- |
-> | 🌐 **Direct Fullscreen Web App** | [**Launch Platform**](https://egyx-hydroflow-water-segmentation.static.hf.space) | Standalone full-width app (no iframe wrappers), complete with Local Inference & Earth Explorer |
-> | 🤗 **Hugging Face Space** | [**Open Space**](https://huggingface.co/spaces/egyx/hydroflow-water-segmentation) | Hosted production Space on Hugging Face (`egyx/hydroflow-water-segmentation`) |
-> | 📊 **Interactive Research Dashboard** | [**View Dashboard**](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/) | GitHub Pages live benchmark curves, Pareto chart, and live NDWI formula simulator |
-> | 📦 **HF Model Hub Repository** | [**Download Weights**](https://huggingface.co/egyx/hydroflow-water-segmentation) | Pretrained PyTorch state dicts & ONNX graph checkpoints |
+> | 🌐 **Interactive Web Platform (Frontend)** | [**Launch Platform**](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/) | Hosted on GitHub Pages: Earth Explorer, Satellite Raster Upload, and Multi-Band Inspector |
+> | ⚡ **Cloud Inference Engine (Backend)** | [**Render API Service**](https://hydroflow-backend-t7f9.onrender.com/health) | Hosted on Render: High-performance ONNX Runtime inference server (`/predict`, `/predict_geo`) |
+> | 📊 **Research Benchmark Analytics** | [**View Dashboard**](https://markegyptian55-cloud.github.io/HydroFlow-12Channel-Water-Segmentation/dashboard.html) | Loss curves, Pareto frontier, and interactive NDWI spectral calculator |
+> | 📦 **Model Weights Repository** | [**Download Weights**](https://huggingface.co/egyx/hydroflow-water-segmentation) | Pretrained PyTorch state dicts & ONNX graph checkpoints |
 > | 📓 **Kaggle Research Collection** | [**Explore 6 Notebooks**](https://www.kaggle.com/work/collections/19309568) | Full scientific reproducibility suite (EDA, Scratch, Ablation, Flow Matching, Transfer Learning) |
 > 
 > **Cellula Technologies — Comprehensive Research & Engineering Deliverable (Weeks 1 & 2)**  
