@@ -35,13 +35,13 @@
 
         <!-- Workspace Tabs -->
         <nav class="workspace-nav" aria-label="Main Navigation">
-            <button data-target="tab-analyze" class="nav-tab active" id="tab-btn-analyze">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <span>Analyze</span>
-            </button>
-            <button data-target="tab-map" class="nav-tab" id="tab-btn-map">
+            <button data-target="tab-map" class="nav-tab active" id="tab-btn-map">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 <span>Earth Explorer</span>
+            </button>
+            <button data-target="tab-analyze" class="nav-tab" id="tab-btn-analyze">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Analyze</span>
             </button>
             <button data-target="tab-api" class="nav-tab" id="tab-btn-api">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -55,6 +55,21 @@
 
         <!-- Header Actions -->
         <div class="header-actions">
+            <!-- Offline / In-Browser Model Cache Widget -->
+            <div class="model-cache-widget" id="model-cache-widget">
+                <button id="btn-model-cache" class="btn-model-cache" type="button" aria-label="Download model for offline in-browser inference">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span id="model-cache-text">Download Model (24.6 MB)</span>
+                </button>
+                <div class="model-cache-tooltip" id="model-cache-tooltip" role="tooltip">
+                    Download it once and use it forever (24.6 MB) &bull; Instant offline in-browser inference
+                </div>
+            </div>
+
             <button id="theme-toggle" class="btn-icon" title="Toggle Light / Dark Theme" aria-label="Toggle theme">
                 <svg id="theme-icon-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                 <svg id="theme-icon-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -66,12 +81,12 @@
     </header>
 
     <!-- Main Workspace -->
-    <main class="app-main" id="main-content">
+    <main class="app-main full-bleed" id="main-content">
 
         <!-- ========================================== -->
         <!-- TAB 1: WORKBENCH (ANALYZE VIEW)           -->
         <!-- ========================================== -->
-        <section id="tab-analyze" class="tab-pane">
+        <section id="tab-analyze" class="tab-pane" style="display: none;">
             <div class="workbench-grid">
                 
                 <!-- Left Column: Controls & Input -->
@@ -289,7 +304,7 @@
         <!-- ========================================== -->
         <!-- TAB 2: EARTH SATELLITE EXPLORER            -->
         <!-- ========================================== -->
-        <section id="tab-map" class="tab-pane" style="display: none; height: calc(100vh - 88px); position: relative;">
+        <section id="tab-map" class="tab-pane" style="height: calc(100vh - 52px); position: relative;">
             
             <!-- Full-Bleed Map View -->
             <div id="leaflet-map" style="width: 100%; height: 100%;"></div>

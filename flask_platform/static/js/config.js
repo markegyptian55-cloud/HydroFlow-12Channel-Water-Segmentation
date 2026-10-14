@@ -30,6 +30,12 @@
         maxUploadBytes: 32 * 1024 * 1024, // 32 MB
         supportedExtensions: ['.tif', '.tiff', '.png', '.jpg', '.jpeg'],
         version: 'v2.5.0-mvp',
+        activeInferenceMode: 'render', // 'render' (default) or 'browser'
+        cacheName: 'hydroflow-model-v1',
+        modelSizeMB: '24.6 MB',
+        modelUrl: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? '/weights/best_model_quant.onnx'
+            : './flask_platform/weights/best_model_quant.onnx',
         
         // Helper method to construct full API URLs
         apiUrl: function(endpoint) {

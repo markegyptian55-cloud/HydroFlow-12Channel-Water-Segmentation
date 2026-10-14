@@ -13,6 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initPresets();
     initComparisonSlider();
     initThemeToggle();
+    initModelCacheWidget();
+
+    // Trigger map resize since Earth Explorer is default active tab
+    setTimeout(() => {
+        if (window.hydroMap) {
+            window.hydroMap.invalidateSize();
+        }
+    }, 200);
 });
 
 /* ==========================================================================
@@ -206,14 +214,17 @@ function resolveAssetPath(path) {
     
     // On local Flask where /static is at root
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (clean.startsWith('weights/')) return '/' + clean;
+        if (clean.startsWith('flask_platform/weights/')) return '/' + clean.replace('flask_platform/', '');
         if (clean.startsWith('flask_platform/static/')) return '/' + clean.replace('flask_platform/', '');
         if (clean.startsWith('static/')) return '/' + clean;
         return '/static/' + clean;
     }
     
-    // On GitHub Pages or static host where files are located under ./flask_platform/static/
-    if (clean.startsWith('static/')) return './flask_platform/' + clean;
+    // On GitHub Pages or static host where files are located under ./flask_platform/
+    if (clean.startsWith('weights/')) return './flask_platform/' + clean;
     if (clean.startsWith('flask_platform/')) return './' + clean;
+    if (clean.startsWith('static/')) return './flask_platform/' + clean;
     return './flask_platform/static/' + clean;
 }
 
@@ -661,3 +672,158 @@ function downloadFile(urlOrBase64, filename) {
     a.click();
     document.body.removeChild(a);
 }
+
+/* ==========================================================================
+   9. MODEL CACHE & IN-BROWSER OFFLINE INFERENCE WIDGET
+   ========================================================================== */
+async function initModelCacheWidget() {
+    const btn = document.getElementById('btn-model-cache');
+    const textSpan = document.getElementById('model-cache-text');
+    const tooltip = document.getElementById('model-cache-tooltip');
+    if (!btn || !textSpan || !tooltip) return;
+
+    const cacheName = window.HYDROFLOW_CONFIG?.cacheName || 'hydroflow-model-v1';
+    const modelUrl = window.HYDROFLOW_CONFIG?.modelUrl || resolveAssetPath('weights/best_model_quant.onnx');
+    const modelSize = window.HYDROFLOW_CONFIG?.modelSizeMB || '24.6 MB';
+
+    // 1. Initial State Check: Is model already stored in Cache API?
+    let isCached = false;
+    if ('caches' in window) {
+        try {
+            const cache = await caches.open(cacheName);
+            const matched = await cache.match(modelUrl);
+            if (matched) {
+                isCached = true;
+            }
+        } catch (e) {
+            console.warn('[ModelCache] Cache API check failed:', e);
+        }
+    }
+
+    if (isCached) {
+        btn.classList.add('cached');
+        textSpan.textContent = `⚡ In-Browser AI (${modelSize} Cached • Offline Ready)`;
+        tooltip.textContent = `Downloaded & saved forever (${modelSize}) • Click to toggle Render/Local mode`;
+        window.HYDROFLOW_CONFIG.activeInferenceMode = 'browser';
+
+        // Preload session from cache if ort is present
+        if (!window.ortSession && typeof ort !== 'undefined') {
+            try {
+                const cache = await caches.open(cacheName);
+                const matched = await cache.match(modelUrl);
+                if (matched) {
+                    const buf = await matched.arrayBuffer();
+                    ort.env.wasm.numThreads = 1;
+                    ort.env.wasm.simd = true;
+                    window.ortSession = await ort.InferenceSession.create(buf, {
+                        executionProviders: ['wasm'],
+                        graphOptimizationLevel: 'all'
+                    });
+                    console.log('[ModelCache] ONNX session preloaded from persistent cache.');
+                }
+            } catch (err) {
+                console.warn('[ModelCache] Error preloading session from cache:', err);
+            }
+        }
+    } else {
+        btn.classList.remove('cached', 'downloading');
+        textSpan.textContent = `📥 Download Model (${modelSize})`;
+        tooltip.textContent = `Download it once and use it forever (${modelSize}) • Instant offline in-browser inference`;
+        window.HYDROFLOW_CONFIG.activeInferenceMode = 'render';
+    }
+
+    // 2. Click Handler
+    btn.addEventListener('click', async () => {
+        // If downloading already, do nothing
+        if (btn.classList.contains('downloading')) return;
+
+        // Case A: Model is already cached -> Toggle between Browser Mode and Render Mode
+        if (btn.classList.contains('cached')) {
+            if (window.HYDROFLOW_CONFIG.activeInferenceMode === 'browser') {
+                window.HYDROFLOW_CONFIG.activeInferenceMode = 'render';
+                textSpan.textContent = `☁️ Cloud AI (Render Active • Click for Local)`;
+                tooltip.textContent = `Currently using Render Cloud AI • Click to switch back to Local Browser AI`;
+                showNotification('Switched to Cloud AI (Render backend).', 'info');
+            } else {
+                window.HYDROFLOW_CONFIG.activeInferenceMode = 'browser';
+                textSpan.textContent = `⚡ In-Browser AI (${modelSize} Cached • Offline Ready)`;
+                tooltip.textContent = `Downloaded & saved forever (${modelSize}) • Click to toggle Render/Local mode`;
+                showNotification('Switched to In-Browser Local AI (~35 ms latency).', 'success');
+            }
+            return;
+        }
+
+        // Case B: Not cached yet -> Stream download with progress, save to Cache API
+        try {
+            btn.classList.add('downloading');
+            textSpan.textContent = `⏳ Downloading ${modelSize} [0%]...`;
+            tooltip.textContent = `Downloading quantized ONNX weights (${modelSize})...`;
+
+            const resp = await fetch(modelUrl);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status} fetching model weights`);
+
+            const contentLength = resp.headers.get('content-length');
+            const totalBytes = contentLength ? parseInt(contentLength, 10) : 24623685;
+
+            const reader = resp.body.getReader();
+            let receivedBytes = 0;
+            const chunks = [];
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                receivedBytes += value.length;
+                const pct = Math.min(100, Math.round((receivedBytes / totalBytes) * 100));
+                textSpan.textContent = `⏳ Downloading ${modelSize} [${pct}%]...`;
+            }
+
+            textSpan.textContent = `⚡ Initializing AI Engine...`;
+
+            // Concatenate all chunks
+            const allChunks = new Uint8Array(receivedBytes);
+            let offset = 0;
+            for (const chunk of chunks) {
+                allChunks.set(chunk, offset);
+                offset += chunk.length;
+            }
+
+            // Persist into Browser Cache API forever
+            if ('caches' in window) {
+                const cache = await caches.open(cacheName);
+                await cache.put(modelUrl, new Response(allChunks.buffer, {
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                        'Content-Length': receivedBytes.toString()
+                    }
+                }));
+            }
+
+            // Initialize ONNX Runtime Web session
+            if (typeof ort !== 'undefined') {
+                ort.env.wasm.numThreads = 1;
+                ort.env.wasm.simd = true;
+                window.ortSession = await ort.InferenceSession.create(allChunks.buffer, {
+                    executionProviders: ['wasm'],
+                    graphOptimizationLevel: 'all'
+                });
+            }
+
+            btn.classList.remove('downloading');
+            btn.classList.add('cached');
+            textSpan.textContent = `⚡ In-Browser AI (${modelSize} Cached • Offline Ready)`;
+            tooltip.textContent = `Downloaded & saved forever (${modelSize}) • Click to toggle Render/Local mode`;
+            window.HYDROFLOW_CONFIG.activeInferenceMode = 'browser';
+
+            showNotification(`Model saved forever (${modelSize})! In-Browser AI active (~35 ms latency).`, 'success');
+
+        } catch (err) {
+            console.error('[ModelCache] Download failed:', err);
+            btn.classList.remove('downloading');
+            textSpan.textContent = `📥 Download Model (${modelSize})`;
+            tooltip.textContent = `Download it once and use it forever (${modelSize}) • Instant offline in-browser inference`;
+            showNotification(`Download failed: ${err.message}. Using Render Cloud backend.`, 'error');
+        }
+    });
+}
+

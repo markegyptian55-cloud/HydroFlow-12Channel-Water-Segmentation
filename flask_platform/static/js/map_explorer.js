@@ -57,6 +57,10 @@ function initLeafletMap() {
 
     window.hydroMap = hydroMap;
 
+    setTimeout(() => {
+        if (hydroMap) hydroMap.invalidateSize();
+    }, 150);
+
     // Place initial beacon at Lake Nasser
     placeBeacon(selectedPoint.lat, selectedPoint.lon, selectedPoint.name);
 
@@ -271,35 +275,33 @@ async function initClientOrtModel() {
     if (ortSession || isModelInitializing) return;
     if (typeof ort === 'undefined') return;
 
-    isModelInitializing = true;
-    try {
-        ort.env.wasm.numThreads = 1;
-        ort.env.wasm.simd = true;
-
-        const modelUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? '/weights/best_model_quant.onnx'
-            : './flask_platform/weights/best_model_quant.onnx';
-
-        ortSession = await ort.InferenceSession.create(modelUrl, {
-            executionProviders: ['webgpu', 'wasm'],
-            graphOptimizationLevel: 'all'
-        });
-        window.ortSession = ortSession;
-        console.log('[HydroFlow] Client ONNX Runtime Web session initialized successfully.');
-    } catch (e) {
-        console.warn('[HydroFlow] WebGPU init fallback to WASM:', e);
+    // Check if model is already stored in persistent Cache API
+    if ('caches' in window) {
         try {
-            const modelUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? './weights/best_model_quant.onnx'
-                : './flask_platform/weights/best_model_quant.onnx';
-            ortSession = await ort.InferenceSession.create(modelUrl, { executionProviders: ['wasm'] });
-            window.ortSession = ortSession;
-            console.log('[HydroFlow] Client ONNX WASM session initialized.');
-        } catch (e2) {
-            console.warn('[HydroFlow] Client ONNX session unavailable, using instant optical engine fallback:', e2);
+            const cacheName = window.HYDROFLOW_CONFIG?.cacheName || 'hydroflow-model-v1';
+            const modelUrl = window.HYDROFLOW_CONFIG?.modelUrl || '/weights/best_model_quant.onnx';
+            const cache = await caches.open(cacheName);
+            const matched = await cache.match(modelUrl);
+            if (matched) {
+                isModelInitializing = true;
+                ort.env.wasm.numThreads = 1;
+                ort.env.wasm.simd = true;
+                const buffer = await matched.arrayBuffer();
+                ortSession = await ort.InferenceSession.create(buffer, {
+                    executionProviders: ['wasm'],
+                    graphOptimizationLevel: 'all'
+                });
+                window.ortSession = ortSession;
+                if (window.HYDROFLOW_CONFIG) {
+                    window.HYDROFLOW_CONFIG.activeInferenceMode = 'browser';
+                }
+                console.log('[HydroFlow] Client ONNX Runtime Web session restored from persistent Cache API.');
+            }
+        } catch (e) {
+            console.warn('[HydroFlow] Cache restore notice:', e);
+        } finally {
+            isModelInitializing = false;
         }
-    } finally {
-        isModelInitializing = false;
     }
 }
 
@@ -517,14 +519,90 @@ async function executeGeoInference(lat, lon, zoom) {
 
     const t0 = performance.now();
 
+    const activeMode = window.HYDROFLOW_CONFIG?.activeInferenceMode || 'render';
+
     try {
-        // 1. Primary Engine: Client-Side Real-Time Inference (Target 25-50 ms)
+        // Option 1: In-Browser AI Mode (Activated when model is downloaded)
+        if (activeMode === 'browser' && window.ortSession) {
+            try {
+                const clientRes = await computeClientTileSegmentation(lat, lon, zoom, threshold);
+                const latencyMs = performance.now() - t0;
+                clientRes.latency_ms = latencyMs;
+
+                // Store in Tier 1 Browser Cache
+                if (clientGeoCache.size >= MAX_CLIENT_CACHE) {
+                    const oldestKey = clientGeoCache.keys().next().value;
+                    clientGeoCache.delete(oldestKey);
+                }
+                clientGeoCache.set(clientKey, clientRes);
+
+                renderGeoResult(clientRes, latencyMs, false);
+                return;
+            } catch (clientErr) {
+                console.warn('[HydroFlow] In-Browser inference fallback to backend:', clientErr);
+            }
+        }
+
+        // Option 2: Cloud Backend Server (Default / Render)
+        let data = null;
         try {
+            const boundsObj = hydroMap.getBounds();
+            const viewport_bounds = [
+                [boundsObj.getSouth(), boundsObj.getWest()],
+                [boundsObj.getNorth(), boundsObj.getEast()]
+            ];
+
+            const getApiUrl = (endpoint) => window.HYDROFLOW_CONFIG?.apiUrl ? window.HYDROFLOW_CONFIG.apiUrl(endpoint) : endpoint;
+
+            const resp = await fetch(getApiUrl('/predict_geo'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(10000),
+                body: JSON.stringify({
+                    lat,
+                    lon,
+                    zoom,
+                    threshold,
+                    area_mode: currentAreaMode,
+                    viewport_bounds
+                })
+            });
+
+            const contentType = resp.headers.get('content-type') || '';
+            if (resp.ok && contentType.includes('application/json')) {
+                data = await resp.json();
+            } else {
+                let errorMsg = `Server error HTTP ${resp.status}`;
+                try {
+                    if (contentType.includes('application/json')) {
+                        const errObj = await resp.json();
+                        errorMsg = errObj.error?.message || errObj.error || errorMsg;
+                    }
+                } catch (e) {}
+                throw new Error(errorMsg);
+            }
+
+            const srvLatency = performance.now() - t0;
+            data.latency_ms = data.latency_ms || srvLatency;
+
+            // Store in Tier 1 Browser Cache
+            if (clientGeoCache.size >= MAX_CLIENT_CACHE) {
+                const oldestKey = clientGeoCache.keys().next().value;
+                clientGeoCache.delete(oldestKey);
+            }
+            clientGeoCache.set(clientKey, data);
+
+            // Render result on map
+            renderGeoResult(data, data.latency_ms, Boolean(data.cached));
+            return;
+
+        } catch (serverErr) {
+            console.warn('[HydroFlow] Cloud backend unavailable, fallback to client engine:', serverErr);
+            // Seamless client fallback so client never gets an error screen
             const clientRes = await computeClientTileSegmentation(lat, lon, zoom, threshold);
             const latencyMs = performance.now() - t0;
             clientRes.latency_ms = latencyMs;
 
-            // Store in Tier 1 Browser Cache
             if (clientGeoCache.size >= MAX_CLIENT_CACHE) {
                 const oldestKey = clientGeoCache.keys().next().value;
                 clientGeoCache.delete(oldestKey);
@@ -533,61 +611,7 @@ async function executeGeoInference(lat, lon, zoom) {
 
             renderGeoResult(clientRes, latencyMs, false);
             return;
-        } catch (clientErr) {
-            console.warn('[HydroFlow] Client-side inference fallback to backend:', clientErr);
         }
-
-        // 2. Secondary Fallback: Cloud Backend Server
-        const boundsObj = hydroMap.getBounds();
-        const viewport_bounds = [
-            [boundsObj.getSouth(), boundsObj.getWest()],
-            [boundsObj.getNorth(), boundsObj.getEast()]
-        ];
-
-        const getApiUrl = (endpoint) => window.HYDROFLOW_CONFIG?.apiUrl ? window.HYDROFLOW_CONFIG.apiUrl(endpoint) : endpoint;
-
-        const resp = await fetch(getApiUrl('/predict_geo'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            signal: AbortSignal.timeout(8000),
-            body: JSON.stringify({
-                lat,
-                lon,
-                zoom,
-                threshold,
-                area_mode: currentAreaMode,
-                viewport_bounds
-            })
-        });
-
-        const contentType = resp.headers.get('content-type') || '';
-        let data = null;
-
-        if (resp.ok && contentType.includes('application/json')) {
-            data = await resp.json();
-        } else {
-            let errorMsg = `Server error HTTP ${resp.status}`;
-            try {
-                if (contentType.includes('application/json')) {
-                    const errObj = await resp.json();
-                    errorMsg = errObj.error?.message || errObj.error || errorMsg;
-                }
-            } catch (e) {}
-            throw new Error(errorMsg);
-        }
-
-        const srvLatency = performance.now() - t0;
-        data.latency_ms = data.latency_ms || srvLatency;
-
-        // Store in Tier 1 Browser Cache
-        if (clientGeoCache.size >= MAX_CLIENT_CACHE) {
-            const oldestKey = clientGeoCache.keys().next().value;
-            clientGeoCache.delete(oldestKey);
-        }
-        clientGeoCache.set(clientKey, data);
-
-        // Render result on map
-        renderGeoResult(data, data.latency_ms, Boolean(data.cached));
 
     } catch (err) {
         console.warn('Map inference failed:', err);
