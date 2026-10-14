@@ -89,6 +89,7 @@
 | `v2.1-clean-suite` | `2152d27` | النسخة المعتمدة والمرفوعة رسمياً على GitHub؛ متضمنة الدفاتر الـ 5 بأسماء موحدة ونظيفة، وحذف التكرار، وتحديث الـ README. | `git reset --hard v2.1-clean-suite` |
 | `v2.2-master-suite` | `7436de8` | النسخة المعتمدة والمرفوعة رسمياً على GitHub؛ متضمنة الدفاتر الـ 6 كاملة مع EfficientNet-B0، والمصفوفة السداسية الشاملة. | `git reset --hard v2.2-master-suite` |
 | `v2.3-interactive-suite` | `77cad6a` | لوحة التحكم التفاعلية الشاملة (Dashboard) مع نشر GitHub Pages المباشر وربط كاجل كوليكشن. | `git reset --hard v2.3-interactive-suite` |
+| `v3.0-edge-platform` | `67db051` | المنصة التفاعلية المباشرة (Earth Explorer الافتراضية، تحميل وحفظ النموذج 24.6MB في كاش المتصفح مدى الحياة، وتحديث الـ README الشامل). | `git reset --hard v3.0-edge-platform` |
 
 ---
 
