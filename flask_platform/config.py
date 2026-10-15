@@ -9,7 +9,9 @@ except ImportError:
 # Base directory paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_PATH = os.path.join(BASE_DIR, "weights", "best_model.pth")
-ONNX_WEIGHTS_PATH = os.path.join(BASE_DIR, "weights", "best_model.onnx")
+_FULL_ONNX = os.path.join(BASE_DIR, "weights", "best_model.onnx")
+_QUANT_ONNX = os.path.join(BASE_DIR, "weights", "best_model_quant.onnx")
+ONNX_WEIGHTS_PATH = _FULL_ONNX if os.path.exists(_FULL_ONNX) else _QUANT_ONNX
 SAMPLES_DIR = os.path.join(BASE_DIR, "static", "samples")
 SAMPLES_META_PATH = os.path.join(SAMPLES_DIR, "samples_meta.json")
 
