@@ -468,6 +468,9 @@ python -m src.generate \
 
 ### 6. Launching the HydroFlow Web Platform Locally
 ```bash
+# Install platform runtime dependencies (CPU-optimized ONNX Runtime, no PyTorch required):
+pip install -r flask_platform/requirements.txt
+
 # Launch the full-stack Flask server with ONNX Runtime backend:
 python flask_platform/run.py
 
