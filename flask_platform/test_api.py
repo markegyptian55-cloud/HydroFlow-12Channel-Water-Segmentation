@@ -45,16 +45,21 @@ class TestHydroFlowAPI(unittest.TestCase):
         self.assertEqual(data["model"]["benchmark_global_iou_pct"], 81.66)
 
     def test_02_samples_endpoint(self):
-        """Test GET /samples returns 200 and lists all 3 validation scenes."""
+        """Test GET /samples returns 200 and lists all 8 validation scenes."""
         resp = self.client.get("/samples")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
         self.assertIn("samples", data)
-        self.assertEqual(len(data["samples"]), 3)
+        self.assertEqual(len(data["samples"]), 8)
         sample_ids = [s["id"] for s in data["samples"]]
         self.assertIn("sample_1_lake", sample_ids)
         self.assertIn("sample_2_river", sample_ids)
         self.assertIn("sample_3_stream", sample_ids)
+        self.assertIn("sample_4_deepwater", sample_ids)
+        self.assertIn("sample_5_estuary", sample_ids)
+        self.assertIn("sample_6_oasis", sample_ids)
+        self.assertIn("sample_7_canal", sample_ids)
+        self.assertIn("sample_8_creek", sample_ids)
 
     def test_03_predict_multipart_json_lake(self):
         """Test POST /predict?format=json on Sample 1 (Lake, High Water)."""

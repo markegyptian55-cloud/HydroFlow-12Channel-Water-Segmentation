@@ -130,7 +130,7 @@
                             <span class="control-label">Validation Scenes (1-Click)</span>
                             <span class="sample-badge">Verified Ground Truth</span>
                         </div>
-                        <div class="sample-chips" role="radiogroup" aria-label="Prepackaged validation scenes">
+                        <div class="sample-chips" role="radiogroup" aria-label="Prepackaged validation scenes" style="max-height: 280px; overflow-y: auto; padding-right: 4px;">
                             
                             <div class="sample-chip sample-preset-card" 
                                  data-sample-id="sample_1_lake"
@@ -146,7 +146,7 @@
                                         <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">76.9%</strong></div>
                                     </div>
                                 </div>
-                                <span class="sample-badge">IoU 93.88%</span>
+                                <span class="sample-badge">IoU 93.94%</span>
                             </div>
                             
                             <div class="sample-chip sample-preset-card" 
@@ -180,7 +180,92 @@
                                         <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">8.02%</strong></div>
                                     </div>
                                 </div>
-                                <span class="sample-badge">IoU 87.38%</span>
+                                <span class="sample-badge">IoU 87.21%</span>
+                            </div>
+
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_4_deepwater"
+                                 data-title="Sample 4: Open Deep Water Basin"
+                                 data-category="Deep Water / Basin"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="./flask_platform/static/samples/sample_4_deepwater_rgb.png" alt="Sample 4: Open Deep Water Basin" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 4: Open Deep Water Basin</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">89.38%</strong></div>
+                                    </div>
+                                </div>
+                                <span class="sample-badge">IoU 98.26%</span>
+                            </div>
+
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_5_estuary"
+                                 data-title="Sample 5: Coastal Bay & Estuary"
+                                 data-category="Coastal / Estuary"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="./flask_platform/static/samples/sample_5_estuary_rgb.png" alt="Sample 5: Coastal Bay & Estuary" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 5: Coastal Bay & Estuary</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">57.26%</strong></div>
+                                    </div>
+                                </div>
+                                <span class="sample-badge">IoU 96.14%</span>
+                            </div>
+
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_6_oasis"
+                                 data-title="Sample 6: Arid Reservoir & Oasis"
+                                 data-category="Arid / Oasis"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="./flask_platform/static/samples/sample_6_oasis_rgb.png" alt="Sample 6: Arid Reservoir & Oasis" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 6: Arid Reservoir & Oasis</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">24.7%</strong></div>
+                                    </div>
+                                </div>
+                                <span class="sample-badge">IoU 89.99%</span>
+                            </div>
+
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_7_canal"
+                                 data-title="Sample 7: Agricultural Canal Network"
+                                 data-category="Canal / Irrigation"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="./flask_platform/static/samples/sample_7_canal_rgb.png" alt="Sample 7: Agricultural Canal Network" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 7: Agricultural Canal Network</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">17.61%</strong></div>
+                                    </div>
+                                </div>
+                                <span class="sample-badge">IoU 90.55%</span>
+                            </div>
+
+                            <div class="sample-chip sample-preset-card" 
+                                 data-sample-id="sample_8_creek"
+                                 data-title="Sample 8: Thin Creek & Riparian Tributary"
+                                 data-category="Creek / Riparian"
+                                 role="radio"
+                                 tabindex="0"
+                                 aria-checked="false">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <img src="./flask_platform/static/samples/sample_8_creek_rgb.png" alt="Sample 8: Thin Creek & Riparian Tributary" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: var(--text-primary); truncate;" class="truncate">Sample 8: Thin Creek & Riparian Tributary</div>
+                                        <div style="font-size: 10px; color: var(--text-tertiary);">GT Water: <strong style="color: var(--water-data);">3.89%</strong></div>
+                                    </div>
+                                </div>
+                                <span class="sample-badge">IoU 83.99%</span>
                             </div>
                             
                         </div>

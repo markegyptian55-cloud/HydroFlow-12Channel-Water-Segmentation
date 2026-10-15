@@ -133,7 +133,23 @@ HydroFlow features an intelligent dual-engine architecture enabling real-time pl
 5. **Full Mobile Optimization**:
    - Native touch gestures (pinch-to-zoom, pan, tap) and responsive viewport layouts optimized for smartphones (Android & iOS).
 
+### 2.2.1 Prepackaged Diverse Validation Suite (8 Hydrological Regimes)
+
+To enable instantaneous, zero-latency 1-click verification across the entire hydrological continuum, the workbench embeds 8 diverse, verified scenes sampled directly from the strictly unseen validation split (62 scenes / 1,015,808 pixels):
+
+| Scene ID | Hydrological Category | Physical Regime Description | GT Water | Pred Water | Validation IoU |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| `sample_1_lake` | **Inland Lake / Reservoir** | Expansive open reservoir with sharp littoral boundaries | `76.90%` | `78.26%` | **`93.94%`** |
+| `sample_2_river` | **Meandering River & Shoreline** | High-curvature river channel with vegetative bank transitions | `35.28%` | `34.38%` | **`96.15%`** |
+| `sample_3_stream` | **Narrow Streams & Wetland** | Fine marshland tributaries near the 10m spatial resolution limit | `8.02%` | `9.13%` | **`87.21%`** |
+| `sample_4_deepwater` | **Open Deep Water Basin** | Vast open water body with deep optical absorption & low noise | `89.38%` | `89.29%` | **`98.26%`** |
+| `sample_5_estuary` | **Coastal Bay & Estuary** | Dynamic tidal flats, shallow lagoons, and brackish shorelines | `57.26%` | `57.72%` | **`96.14%`** |
+| `sample_6_oasis` | **Arid Reservoir & Oasis** | Desert reservoir with high-contrast dry sand and rocky topography | `24.70%` | `24.87%` | **`89.99%`** |
+| `sample_7_canal` | **Agricultural Canal Network** | Geometric irrigation channels intersecting cultivated cropland | `17.61%` | `16.37%` | **`90.55%`** |
+| `sample_8_creek` | **Thin Creek & Riparian Tributary** | Sub-kilometer meandering stream through dense canopy & alluvium | `3.89%` | `4.04%` | **`83.99%`** |
+
 ---
+
 
 ## 2.3 Research Benchmark Analytics Dashboard
 

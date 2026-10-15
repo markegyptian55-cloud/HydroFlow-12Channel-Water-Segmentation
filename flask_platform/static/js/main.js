@@ -233,11 +233,12 @@ const PREPACKAGED_DATA = {
         filename: 'sample_1_lake.tif',
         is_multispectral: true,
         input_channels: 12,
-        water_percentage: 78.31,
-        water_pixels: 12830,
+        water_percentage: 78.26,
+        water_pixels: 12822,
         total_pixels: 16384,
-        confidence_mean: 96.4,
+        confidence_mean: 97.69,
         latency_ms: 24.3,
+        expected_iou: 93.94,
         images: {
             rgb_preview: resolveAssetPath('samples/sample_1_lake_rgb.png'),
             mask_preview: resolveAssetPath('samples/sample_1_lake_pred_mask.png'),
@@ -248,11 +249,12 @@ const PREPACKAGED_DATA = {
         filename: 'sample_2_river.tif',
         is_multispectral: true,
         input_channels: 12,
-        water_percentage: 34.35,
-        water_pixels: 5628,
+        water_percentage: 34.38,
+        water_pixels: 5632,
         total_pixels: 16384,
-        confidence_mean: 94.8,
+        confidence_mean: 98.57,
         latency_ms: 24.1,
+        expected_iou: 96.15,
         images: {
             rgb_preview: resolveAssetPath('samples/sample_2_river_rgb.png'),
             mask_preview: resolveAssetPath('samples/sample_2_river_pred_mask.png'),
@@ -263,15 +265,96 @@ const PREPACKAGED_DATA = {
         filename: 'sample_3_stream.tif',
         is_multispectral: true,
         input_channels: 12,
-        water_percentage: 9.11,
-        water_pixels: 1492,
+        water_percentage: 9.13,
+        water_pixels: 1496,
         total_pixels: 16384,
-        confidence_mean: 91.2,
+        confidence_mean: 95.65,
         latency_ms: 23.8,
+        expected_iou: 87.21,
         images: {
             rgb_preview: resolveAssetPath('samples/sample_3_stream_rgb.png'),
             mask_preview: resolveAssetPath('samples/sample_3_stream_pred_mask.png'),
             overlay_preview: resolveAssetPath('samples/sample_3_stream_overlay.png')
+        }
+    },
+    'sample_4_deepwater': {
+        filename: 'sample_4_deepwater.tif',
+        is_multispectral: true,
+        input_channels: 12,
+        water_percentage: 89.29,
+        water_pixels: 14629,
+        total_pixels: 16384,
+        confidence_mean: 99.26,
+        latency_ms: 24.0,
+        expected_iou: 98.26,
+        images: {
+            rgb_preview: resolveAssetPath('samples/sample_4_deepwater_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_4_deepwater_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_4_deepwater_overlay.png')
+        }
+    },
+    'sample_5_estuary': {
+        filename: 'sample_5_estuary.tif',
+        is_multispectral: true,
+        input_channels: 12,
+        water_percentage: 57.72,
+        water_pixels: 9457,
+        total_pixels: 16384,
+        confidence_mean: 98.95,
+        latency_ms: 24.2,
+        expected_iou: 96.14,
+        images: {
+            rgb_preview: resolveAssetPath('samples/sample_5_estuary_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_5_estuary_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_5_estuary_overlay.png')
+        }
+    },
+    'sample_6_oasis': {
+        filename: 'sample_6_oasis.tif',
+        is_multispectral: true,
+        input_channels: 12,
+        water_percentage: 24.87,
+        water_pixels: 4075,
+        total_pixels: 16384,
+        confidence_mean: 96.61,
+        latency_ms: 23.9,
+        expected_iou: 89.99,
+        images: {
+            rgb_preview: resolveAssetPath('samples/sample_6_oasis_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_6_oasis_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_6_oasis_overlay.png')
+        }
+    },
+    'sample_7_canal': {
+        filename: 'sample_7_canal.tif',
+        is_multispectral: true,
+        input_channels: 12,
+        water_percentage: 16.37,
+        water_pixels: 2682,
+        total_pixels: 16384,
+        confidence_mean: 96.48,
+        latency_ms: 24.1,
+        expected_iou: 90.55,
+        images: {
+            rgb_preview: resolveAssetPath('samples/sample_7_canal_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_7_canal_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_7_canal_overlay.png')
+        }
+    },
+    'sample_8_creek': {
+        filename: 'sample_8_creek.tif',
+        is_multispectral: true,
+        input_channels: 12,
+        water_percentage: 4.04,
+        water_pixels: 662,
+        total_pixels: 16384,
+        confidence_mean: 92.34,
+        latency_ms: 23.7,
+        expected_iou: 83.99,
+        images: {
+            rgb_preview: resolveAssetPath('samples/sample_8_creek_rgb.png'),
+            mask_preview: resolveAssetPath('samples/sample_8_creek_pred_mask.png'),
+            overlay_preview: resolveAssetPath('samples/sample_8_creek_overlay.png')
         }
     }
 };

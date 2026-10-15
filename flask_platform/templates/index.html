@@ -126,7 +126,7 @@
                             <span class="control-label">Validation Scenes (1-Click)</span>
                             <span class="sample-badge">Verified Ground Truth</span>
                         </div>
-                        <div class="sample-chips" role="radiogroup" aria-label="Prepackaged validation scenes">
+                        <div class="sample-chips" role="radiogroup" aria-label="Prepackaged validation scenes" style="max-height: 280px; overflow-y: auto; padding-right: 4px;">
                             {% for sample in samples %}
                             <div class="sample-chip sample-preset-card" 
                                  data-sample-id="{{ sample.id }}"
