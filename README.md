@@ -479,6 +479,33 @@ python flask_platform/run.py
 # Open dashboard.html for Research Analytics & Loss Curves
 ```
 
+### 7. API Test Results (Task 4)
+
+Measured REST API inference results across the 3 primary prepackaged Sentinel-2 validation scenes (executed via ONNX Runtime engine):
+
+| Sample | HTTP | Water % | Water Pixels | Mean Confidence | Latency | Mask |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| `sample_1_lake` | 200 | 78.31% | 12,831 / 16,384 | 97.67% | 30.81 ms | [`sample_1_lake_mask.png`](flask_platform/test_results/sample_1_lake_mask.png) |
+| `sample_2_river` | 200 | 34.35% | 5,628 / 16,384 | 98.59% | 27.60 ms | [`sample_2_river_mask.png`](flask_platform/test_results/sample_2_river_mask.png) |
+| `sample_3_stream` | 200 | 9.11% | 1,493 / 16,384 | 95.61% | 27.63 ms | [`sample_3_stream_mask.png`](flask_platform/test_results/sample_3_stream_mask.png) |
+
+To reproduce these measured benchmarks and save fresh prediction masks:
+```bash
+cd flask_platform && python document_tests.py
+```
+
+Example `curl` request to extract a binary PNG water segmentation mask:
+```bash
+curl -X POST "http://127.0.0.1:5000/predict?format=image" \
+  -F "file=@flask_platform/static/samples/sample_1_lake.tif" \
+  --output predicted_mask.png
+```
+
+To run the complete automated API regression test suite (23 integration tests):
+```bash
+python flask_platform/test_api.py
+```
+
 ---
 
 ## 10. Citation & Attribution
